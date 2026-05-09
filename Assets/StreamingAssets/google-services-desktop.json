@@ -1,0 +1,69 @@
+{
+  "project_info": {
+    "firebase_url": "null",
+    "project_number": "534995885505",
+    "project_id": "russian-bridge-7480a",
+    "storage_bucket": "russian-bridge-7480a.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:534995885505:android:307e4dc5790dd161a12340",
+        "android_client_info": {
+          "package_name": "com.UnnamedTeam.RussainBribge"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "534995885505-24iutdeglifki448gu7h1sjuapl0t61c.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBmIESNBtWAiAuKtzCJg68JJIjig8WVOYI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "534995885505-24iutdeglifki448gu7h1sjuapl0t61c.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:534995885505:android:94f6bd4f84301983a12340",
+        "android_client_info": {
+          "package_name": "default.company"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "534995885505-24iutdeglifki448gu7h1sjuapl0t61c.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBmIESNBtWAiAuKtzCJg68JJIjig8WVOYI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "534995885505-24iutdeglifki448gu7h1sjuapl0t61c.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

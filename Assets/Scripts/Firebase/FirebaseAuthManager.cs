@@ -361,7 +361,7 @@ public class FirebaseAuthManager : MonoBehaviour
             Debug.Log("Уровень языка: " + References.languageLevel);
             Debug.Log("Опыт: " + References.experience);
 
-            UnityEngine.SceneManagement.SceneManager.LoadScene("MainScene");
+            UnityEngine.SceneManagement.SceneManager.LoadScene("MainMenu");
         }
         else
         {

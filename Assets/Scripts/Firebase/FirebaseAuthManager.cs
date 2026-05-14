@@ -308,6 +308,7 @@ public class FirebaseAuthManager : MonoBehaviour
             CompletedLessons = 0,
             Experience = 0,
             StreakDays = 0,
+            CurrentLesson = "",
             CreatedAt = Timestamp.GetCurrentTimestamp(),
             LastLogin = Timestamp.GetCurrentTimestamp()
         };

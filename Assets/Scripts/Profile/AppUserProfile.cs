@@ -28,6 +28,9 @@ public class AppUserProfile
     public int StreakDays { get; set; }
 
     [FirestoreProperty]
+    public string CurrentLesson { get; set; }
+
+    [FirestoreProperty]
     public Timestamp CreatedAt { get; set; }
 
     [FirestoreProperty]

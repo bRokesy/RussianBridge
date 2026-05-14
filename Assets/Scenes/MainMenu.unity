@@ -685,8 +685,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: "\u8BFE 1"
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
-  m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 2e8f559ed6e048b4fa6f7a6b82691b87, type: 2}
+  m_sharedMaterial: {fileID: 4482600098274225961, guid: 2e8f559ed6e048b4fa6f7a6b82691b87, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -1304,7 +1304,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 383625816}
+      - m_Target: {fileID: 383625822}
         m_TargetAssemblyTypeName: LessonButton, Assembly-CSharp
         m_MethodName: OnClick
         m_Mode: 1
@@ -1366,7 +1366,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fb37f8d14bcaaec4898c657da4cd217f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::LessonButton
-  lessonData: {fileID: 0}
+  lessonData: {fileID: 11400000, guid: 4f30c18911d23544c971fe436d37c27f, type: 2}
+  doneLessonSprite: {fileID: 21300000, guid: 09b7505717795c4409efe5a06a67a972, type: 3}
 --- !u!1 &422370368
 GameObject:
   m_ObjectHideFlags: 0
@@ -1689,8 +1690,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: "\u8BFE 5"
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
-  m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 2e8f559ed6e048b4fa6f7a6b82691b87, type: 2}
+  m_sharedMaterial: {fileID: 4482600098274225961, guid: 2e8f559ed6e048b4fa6f7a6b82691b87, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -2861,8 +2862,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: "\u8BFE 10"
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
-  m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 2e8f559ed6e048b4fa6f7a6b82691b87, type: 2}
+  m_sharedMaterial: {fileID: 4482600098274225961, guid: 2e8f559ed6e048b4fa6f7a6b82691b87, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -3377,7 +3378,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 900160298}
+      - m_Target: {fileID: 900160304}
         m_TargetAssemblyTypeName: LessonButton, Assembly-CSharp
         m_MethodName: OnClick
         m_Mode: 1
@@ -3439,7 +3440,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fb37f8d14bcaaec4898c657da4cd217f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::LessonButton
-  lessonData: {fileID: 0}
+  lessonData: {fileID: 11400000, guid: 80eca024a2f0c1d49ba967c15464fcae, type: 2}
+  doneLessonSprite: {fileID: 21300000, guid: 09b7505717795c4409efe5a06a67a972, type: 3}
 --- !u!21 &934680714
 Material:
   serializedVersion: 8
@@ -3721,7 +3723,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 0}
+      - m_Target: {fileID: 985978888}
         m_TargetAssemblyTypeName: LessonButton, Assembly-CSharp
         m_MethodName: OnClick
         m_Mode: 1
@@ -3783,7 +3785,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fb37f8d14bcaaec4898c657da4cd217f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::LessonButton
-  lessonData: {fileID: 0}
+  lessonData: {fileID: 11400000, guid: ca3a14ac2492a2845959c7ce6fe9cb47, type: 2}
+  doneLessonSprite: {fileID: 21300000, guid: 09b7505717795c4409efe5a06a67a972, type: 3}
 --- !u!21 &1017841343
 Material:
   serializedVersion: 8
@@ -4169,8 +4172,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: "\u8BFE 6"
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
-  m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 2e8f559ed6e048b4fa6f7a6b82691b87, type: 2}
+  m_sharedMaterial: {fileID: 4482600098274225961, guid: 2e8f559ed6e048b4fa6f7a6b82691b87, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -4375,7 +4378,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1096952585}
+      - m_Target: {fileID: 1096952591}
         m_TargetAssemblyTypeName: LessonButton, Assembly-CSharp
         m_MethodName: OnClick
         m_Mode: 1
@@ -4437,7 +4440,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fb37f8d14bcaaec4898c657da4cd217f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::LessonButton
-  lessonData: {fileID: 0}
+  lessonData: {fileID: 11400000, guid: 6eaa4f4bf8a986141a70c00a45f3c307, type: 2}
+  doneLessonSprite: {fileID: 21300000, guid: 09b7505717795c4409efe5a06a67a972, type: 3}
 --- !u!1 &1143110657
 GameObject:
   m_ObjectHideFlags: 0
@@ -4566,7 +4570,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1143110659}
+      - m_Target: {fileID: 1143110665}
         m_TargetAssemblyTypeName: LessonButton, Assembly-CSharp
         m_MethodName: OnClick
         m_Mode: 1
@@ -4628,7 +4632,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fb37f8d14bcaaec4898c657da4cd217f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::LessonButton
-  lessonData: {fileID: 0}
+  lessonData: {fileID: 11400000, guid: 0a3bedff7db284a41b2304be13eea090, type: 2}
+  doneLessonSprite: {fileID: 21300000, guid: 09b7505717795c4409efe5a06a67a972, type: 3}
 --- !u!1 &1191374849
 GameObject:
   m_ObjectHideFlags: 0
@@ -4837,6 +4842,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Nobi.UiRoundedCorners::Nobi.UiRoundedCorners.ImageWithRoundedCorners
   lessonData: {fileID: 11400000, guid: 6687534dc85ee42a38d332e8e91db501, type: 2}
+  doneLessonSprite: {fileID: 21300000, guid: 09b7505717795c4409efe5a06a67a972, type: 3}
 --- !u!114 &1208267196
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4990,8 +4996,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: "\u8BFE 7"
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
-  m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 2e8f559ed6e048b4fa6f7a6b82691b87, type: 2}
+  m_sharedMaterial: {fileID: 4482600098274225961, guid: 2e8f559ed6e048b4fa6f7a6b82691b87, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -5403,15 +5409,15 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::ProgressManager
   lessons:
   - {fileID: 11400000, guid: 6687534dc85ee42a38d332e8e91db501, type: 2}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
+  - {fileID: 11400000, guid: b4049123de9284845ab8ed01dc39b344, type: 2}
+  - {fileID: 11400000, guid: ca3a14ac2492a2845959c7ce6fe9cb47, type: 2}
+  - {fileID: 11400000, guid: b401edf6d901c3a40bfecf31a3d67415, type: 2}
+  - {fileID: 11400000, guid: 6eaa4f4bf8a986141a70c00a45f3c307, type: 2}
+  - {fileID: 11400000, guid: 0a3bedff7db284a41b2304be13eea090, type: 2}
+  - {fileID: 11400000, guid: 4f30c18911d23544c971fe436d37c27f, type: 2}
+  - {fileID: 11400000, guid: 80eca024a2f0c1d49ba967c15464fcae, type: 2}
+  - {fileID: 11400000, guid: 15463a0f0c52c414a873104ad655cccc, type: 2}
+  - {fileID: 11400000, guid: 8739d272b97277e43a637fe8dde3c174, type: 2}
   nextExerciseDelay: 1.5
   progressLabel: {fileID: 0}
   nextButton: {fileID: 0}
@@ -5545,7 +5551,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1332242382}
+      - m_Target: {fileID: 1332242388}
         m_TargetAssemblyTypeName: LessonButton, Assembly-CSharp
         m_MethodName: OnClick
         m_Mode: 1
@@ -5607,7 +5613,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fb37f8d14bcaaec4898c657da4cd217f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::LessonButton
-  lessonData: {fileID: 0}
+  lessonData: {fileID: 11400000, guid: 15463a0f0c52c414a873104ad655cccc, type: 2}
+  doneLessonSprite: {fileID: 21300000, guid: 09b7505717795c4409efe5a06a67a972, type: 3}
 --- !u!1 &1343198605
 GameObject:
   m_ObjectHideFlags: 0
@@ -5908,8 +5915,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: "\u8BFE 2"
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
-  m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 2e8f559ed6e048b4fa6f7a6b82691b87, type: 2}
+  m_sharedMaterial: {fileID: 4482600098274225961, guid: 2e8f559ed6e048b4fa6f7a6b82691b87, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -6332,8 +6339,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: "\u8BFE 8"
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
-  m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 2e8f559ed6e048b4fa6f7a6b82691b87, type: 2}
+  m_sharedMaterial: {fileID: 4482600098274225961, guid: 2e8f559ed6e048b4fa6f7a6b82691b87, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -6586,8 +6593,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: "\u8BFE 4"
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
-  m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 2e8f559ed6e048b4fa6f7a6b82691b87, type: 2}
+  m_sharedMaterial: {fileID: 4482600098274225961, guid: 2e8f559ed6e048b4fa6f7a6b82691b87, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -6827,8 +6834,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: "\u8BFE 3"
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
-  m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 2e8f559ed6e048b4fa6f7a6b82691b87, type: 2}
+  m_sharedMaterial: {fileID: 4482600098274225961, guid: 2e8f559ed6e048b4fa6f7a6b82691b87, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -7806,7 +7813,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 0}
+      - m_Target: {fileID: 1929708924}
         m_TargetAssemblyTypeName: LessonButton, Assembly-CSharp
         m_MethodName: OnClick
         m_Mode: 1
@@ -7868,7 +7875,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fb37f8d14bcaaec4898c657da4cd217f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::LessonButton
-  lessonData: {fileID: 0}
+  lessonData: {fileID: 11400000, guid: b401edf6d901c3a40bfecf31a3d67415, type: 2}
+  doneLessonSprite: {fileID: 21300000, guid: 09b7505717795c4409efe5a06a67a972, type: 3}
 --- !u!21 &1936990649
 Material:
   serializedVersion: 8
@@ -8117,7 +8125,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fb37f8d14bcaaec4898c657da4cd217f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::LessonButton
-  lessonData: {fileID: 0}
+  lessonData: {fileID: 11400000, guid: b4049123de9284845ab8ed01dc39b344, type: 2}
+  doneLessonSprite: {fileID: 21300000, guid: 09b7505717795c4409efe5a06a67a972, type: 3}
 --- !u!1 &2005254424
 GameObject:
   m_ObjectHideFlags: 0
@@ -8177,8 +8186,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: "\u8BFE 9"
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
-  m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 2e8f559ed6e048b4fa6f7a6b82691b87, type: 2}
+  m_sharedMaterial: {fileID: 4482600098274225961, guid: 2e8f559ed6e048b4fa6f7a6b82691b87, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -8657,7 +8666,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 2089992980}
+      - m_Target: {fileID: 2089992986}
         m_TargetAssemblyTypeName: LessonButton, Assembly-CSharp
         m_MethodName: OnClick
         m_Mode: 1
@@ -8719,7 +8728,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fb37f8d14bcaaec4898c657da4cd217f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::LessonButton
-  lessonData: {fileID: 0}
+  lessonData: {fileID: 11400000, guid: 8739d272b97277e43a637fe8dde3c174, type: 2}
+  doneLessonSprite: {fileID: 21300000, guid: 09b7505717795c4409efe5a06a67a972, type: 3}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

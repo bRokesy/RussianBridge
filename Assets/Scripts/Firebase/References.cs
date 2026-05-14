@@ -11,6 +11,7 @@ public class References : MonoBehaviour
     public static int completedLessons = 0;
     public static int experience = 0;
     public static int streakDays = 0;
+    public static string currentLesson = "";
 
     public static void SetUserProfile(AppUserProfile profile)
     {
@@ -23,6 +24,7 @@ public class References : MonoBehaviour
         completedLessons = profile.CompletedLessons;
         experience = profile.Experience;
         streakDays = profile.StreakDays;
+        currentLesson = profile.CurrentLesson;
     }
 
     public static void Clear()
@@ -36,5 +38,6 @@ public class References : MonoBehaviour
         completedLessons = 0;
         experience = 0;
         streakDays = 0;
+        currentLesson = "";
     }
 }

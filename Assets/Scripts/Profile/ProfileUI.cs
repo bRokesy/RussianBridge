@@ -30,7 +30,13 @@ public class ProfileUI : MonoBehaviour
             emailText.text = References.userEmail;
 
         if (languageLevelText != null)
-            languageLevelText.text = "Уровень: " + References.languageLevel;
+        {
+            string currentLesson = string.IsNullOrEmpty(References.currentLesson)
+                ? "не выбран"
+                : References.currentLesson;
+
+            languageLevelText.text = "Текущий урок: " + currentLesson;
+        }
 
         if (completedLessonsText != null)
             completedLessonsText.text = "Пройдено уроков: " + References.completedLessons;

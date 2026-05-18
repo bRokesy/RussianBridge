@@ -9,16 +9,14 @@ public class SceneUIPanels : MonoBehaviour
     public GameObject writingPanel;
     public GameObject flashcardsPanel;
 
-    void Awake()
+    private void Awake()
     {
         SetAll(false);
     }
 
-    void Start()
+    private void Start()
     {
-        // Передать ссылки в ProgressManager
-        if (ProgressManager.Instance != null)
-            ProgressManager.Instance.RegisterPanels(this);
+        ProgressManager.Instance?.RegisterPanels(this);
     }
 
     public void ShowOnly(LessonData.ExerciseType type)
@@ -28,24 +26,29 @@ public class SceneUIPanels : MonoBehaviour
         switch (type)
         {
             case LessonData.ExerciseType.FillBlank:
-                fillBlankPanel?.SetActive(true);    break;
+                fillBlankPanel?.SetActive(true);
+                break;
             case LessonData.ExerciseType.MakeSentence:
-                makeSentencePanel?.SetActive(true); break;
+                makeSentencePanel?.SetActive(true);
+                break;
             case LessonData.ExerciseType.Translate:
-                translatePanel?.SetActive(true);    break;
+                translatePanel?.SetActive(true);
+                break;
             case LessonData.ExerciseType.Writing:
-                writingPanel?.SetActive(true);      break;
+                writingPanel?.SetActive(true);
+                break;
             case LessonData.ExerciseType.Flashcards:
-                flashcardsPanel?.SetActive(true);   break;
+                flashcardsPanel?.SetActive(true);
+                break;
         }
     }
 
-    void SetAll(bool state)
+    private void SetAll(bool state)
     {
-        if (fillBlankPanel) fillBlankPanel?.SetActive(state);
-        if (makeSentencePanel) makeSentencePanel?.SetActive(state);
-        if (translatePanel) translatePanel?.SetActive(state);
-        if (writingPanel) writingPanel?.SetActive(state);
-        if (flashcardsPanel) flashcardsPanel?.SetActive(state);
+        fillBlankPanel?.SetActive(state);
+        makeSentencePanel?.SetActive(state);
+        translatePanel?.SetActive(state);
+        writingPanel?.SetActive(state);
+        flashcardsPanel?.SetActive(state);
     }
 }

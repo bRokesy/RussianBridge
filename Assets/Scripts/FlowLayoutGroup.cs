@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
@@ -9,9 +8,9 @@ public class FlowLayoutGroup : LayoutGroup
     [Header("Flow Settings")]
     public float spacingX = 6f;
     public float spacingY = 8f;
-    public bool centerRows = true; // центрировать каждую строку
+    public bool centerRows = true;
 
-    void OnEnable()
+    private void OnEnable()
     {
         Canvas.ForceUpdateCanvases();
         LayoutRebuilder.ForceRebuildLayoutImmediate(rectTransform);
@@ -28,104 +27,150 @@ public class FlowLayoutGroup : LayoutGroup
         SetLayoutInputForAxis(0f, GetTotalHeight(), -1f, 1);
     }
 
-    public override void SetLayoutHorizontal() => DoLayout();
-    public override void SetLayoutVertical()   => DoLayout();
-
-    void DoLayout()
+    public override void SetLayoutHorizontal()
     {
-        float containerWidth = rectTransform.rect.width - padding.left - padding.right;
-        if (containerWidth <= 0)
-        {
-            var p = transform.parent as RectTransform;
-            if (p != null) containerWidth = p.rect.width - padding.left - padding.right;
-        }
-        if (containerWidth <= 0) return;
+        DoLayout();
+    }
 
-        // Разбиваем детей на строки
-        var rows = new List<List<int>>();
-        var currentRow = new List<int>();
-        float x = 0f;
+    public override void SetLayoutVertical()
+    {
+        DoLayout();
+    }
 
-        for (int i = 0; i < rectChildren.Count; i++)
-        {
-            float childW = LayoutUtility.GetPreferredWidth(rectChildren[i]);
-            if (currentRow.Count > 0 && x + childW > containerWidth)
-            {
-                rows.Add(currentRow);
-                currentRow = new List<int>();
-                x = 0f;
-            }
-            currentRow.Add(i);
-            x += childW + spacingX;
-        }
-        if (currentRow.Count > 0) rows.Add(currentRow);
+    private void DoLayout()
+    {
+        float containerWidth = GetContainerWidth();
+        if (containerWidth <= 0f)
+            return;
 
-        // Расставляем с центрированием
+        List<List<int>> rows = BuildRows(containerWidth);
+
         float y = padding.top;
-        foreach (var row in rows)
+        foreach (List<int> row in rows)
         {
-            // Считаем ширину строки
-            float rowWidth = 0f;
-            foreach (int idx in row)
-                rowWidth += LayoutUtility.GetPreferredWidth(rectChildren[idx]) + spacingX;
-            rowWidth -= spacingX;
+            float rowWidth = GetRowWidth(row);
+            float rowHeight = GetRowHeight(row);
+            float x = GetStartX(containerWidth, rowWidth);
 
-            float rowHeight = 0f;
-            foreach (int idx in row)
-                rowHeight = Mathf.Max(rowHeight, LayoutUtility.GetPreferredHeight(rectChildren[idx]));
-
-            // Начальный X для центрирования
-            float startX = centerRows
-                ? padding.left + (containerWidth - rowWidth) / 2f
-                : padding.left;
-
-            float cx = startX;
-            foreach (int idx in row)
+            foreach (int index in row)
             {
-                var child = rectChildren[idx];
-                float childW = LayoutUtility.GetPreferredWidth(child);
-                float childH = LayoutUtility.GetPreferredHeight(child);
-                // Вертикальное выравнивание по центру строки
-                float childY = y + (rowHeight - childH) / 2f;
-                SetChildAlongAxis(child, 0, cx, childW);
-                SetChildAlongAxis(child, 1, childY, childH);
-                cx += childW + spacingX;
+                RectTransform child = rectChildren[index];
+                float childWidth = GetPreferredWidth(child);
+                float childHeight = GetPreferredHeight(child);
+                float childY = y + (rowHeight - childHeight) / 2f;
+
+                SetChildAlongAxis(child, 0, x, childWidth);
+                SetChildAlongAxis(child, 1, childY, childHeight);
+
+                x += childWidth + spacingX;
             }
 
             y += rowHeight + spacingY;
         }
     }
 
-    float GetTotalHeight()
+    private List<List<int>> BuildRows(float containerWidth)
     {
-        float containerWidth = rectTransform.rect.width - padding.left - padding.right;
-        if (containerWidth <= 0)
+        var rows = new List<List<int>>();
+        var currentRow = new List<int>();
+        float rowWidth = 0f;
+
+        for (int i = 0; i < rectChildren.Count; i++)
         {
-            var p = transform.parent as RectTransform;
-            if (p != null) containerWidth = p.rect.width - padding.left - padding.right;
-        }
-        if (containerWidth <= 0) return 0f;
+            float childWidth = GetPreferredWidth(rectChildren[i]);
 
-        float x = 0f;
-        float y = padding.top;
-        float rowH = 0f;
-
-        foreach (var child in rectChildren)
-        {
-            float childW = LayoutUtility.GetPreferredWidth(child);
-            float childH = LayoutUtility.GetPreferredHeight(child);
-
-            if (x > 0 && x + childW > containerWidth)
+            if (currentRow.Count > 0 && rowWidth + childWidth > containerWidth)
             {
-                x = 0f;
-                y += rowH + spacingY;
-                rowH = 0f;
+                rows.Add(currentRow);
+                currentRow = new List<int>();
+                rowWidth = 0f;
             }
 
-            x += childW + spacingX;
-            rowH = Mathf.Max(rowH, childH);
+            currentRow.Add(i);
+            rowWidth += childWidth + spacingX;
         }
 
-        return y + rowH + padding.bottom;
+        if (currentRow.Count > 0)
+            rows.Add(currentRow);
+
+        return rows;
+    }
+
+    private float GetTotalHeight()
+    {
+        float containerWidth = GetContainerWidth();
+        if (containerWidth <= 0f)
+            return 0f;
+
+        float rowWidth = 0f;
+        float rowHeight = 0f;
+        float totalHeight = padding.top;
+
+        foreach (RectTransform child in rectChildren)
+        {
+            float childWidth = GetPreferredWidth(child);
+            float childHeight = GetPreferredHeight(child);
+
+            if (rowWidth > 0f && rowWidth + childWidth > containerWidth)
+            {
+                rowWidth = 0f;
+                totalHeight += rowHeight + spacingY;
+                rowHeight = 0f;
+            }
+
+            rowWidth += childWidth + spacingX;
+            rowHeight = Mathf.Max(rowHeight, childHeight);
+        }
+
+        return totalHeight + rowHeight + padding.bottom;
+    }
+
+    private float GetContainerWidth()
+    {
+        float width = rectTransform.rect.width - padding.left - padding.right;
+        if (width > 0f)
+            return width;
+
+        RectTransform parent = transform.parent as RectTransform;
+        return parent != null
+            ? parent.rect.width - padding.left - padding.right
+            : 0f;
+    }
+
+    private float GetStartX(float containerWidth, float rowWidth)
+    {
+        return centerRows
+            ? padding.left + (containerWidth - rowWidth) / 2f
+            : padding.left;
+    }
+
+    private float GetRowWidth(List<int> row)
+    {
+        float width = 0f;
+
+        foreach (int index in row)
+            width += GetPreferredWidth(rectChildren[index]) + spacingX;
+
+        return Mathf.Max(0f, width - spacingX);
+    }
+
+    private float GetRowHeight(List<int> row)
+    {
+        float height = 0f;
+
+        foreach (int index in row)
+            height = Mathf.Max(height, GetPreferredHeight(rectChildren[index]));
+
+        return height;
+    }
+
+    private static float GetPreferredWidth(RectTransform child)
+    {
+        return LayoutUtility.GetPreferredWidth(child);
+    }
+
+    private static float GetPreferredHeight(RectTransform child)
+    {
+        return LayoutUtility.GetPreferredHeight(child);
     }
 }

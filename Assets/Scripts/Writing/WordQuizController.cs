@@ -13,34 +13,37 @@ public class WordQuizController : MonoBehaviour, IExerciseController
     private WordQuizModel model;
     private WordQuizView view;
     private AudioSource audioSource;
-    private int currentClipIndex = 0;
     private WritingData currentData;
-    private int currentIndex = 0;
+    private int currentClipIndex;
+    private int currentIndex;
 
-    void Awake()
+    private void Awake()
     {
-        model       = GetComponent<WordQuizModel>();
-        view        = GetComponent<WordQuizView>();
+        model = GetComponent<WordQuizModel>();
+        view = GetComponent<WordQuizView>();
         audioSource = GetComponent<AudioSource>();
 
-        view.InputField.onEndEdit.AddListener(CheckAnswer);
+        if (view.InputField != null)
+            view.InputField.onEndEdit.AddListener(CheckAnswer);
     }
 
-    void OnDestroy()
+    private void OnDestroy()
     {
-        view.InputField.onEndEdit.RemoveListener(CheckAnswer);
+        if (view != null && view.InputField != null)
+            view.InputField.onEndEdit.RemoveListener(CheckAnswer);
     }
 
     public void LoadExercise(WritingData data)
     {
-        currentData  = data;
+        currentData = data;
         currentIndex = 0;
         ShowQuestion();
     }
 
-    void ShowQuestion()
+    private void ShowQuestion()
     {
-        if (currentData == null || currentIndex >= currentData.questions.Count) return;
+        if (currentData == null || currentData.questions == null || currentIndex >= currentData.questions.Count)
+            return;
 
         model.LoadQuestion(currentData.questions[currentIndex]);
         currentClipIndex = 0;
@@ -49,29 +52,31 @@ public class WordQuizController : MonoBehaviour, IExerciseController
 
     public void PlayWord()
     {
-        var clips = model.WordClips;
-        if (clips == null || clips.Length == 0) return;
+        AudioClip[] clips = model.WordClips;
+        if (clips == null || clips.Length == 0)
+            return;
 
         AudioClip clip = playMode == PlayMode.Random
             ? clips[Random.Range(0, clips.Length)]
             : clips[currentClipIndex++ % clips.Length];
+
+        if (clip == null)
+            return;
 
         audioSource.Stop();
         audioSource.clip = clip;
         audioSource.Play();
     }
 
-    void CheckAnswer(string userInput)
+    private void CheckAnswer(string userInput)
     {
-        if (string.IsNullOrWhiteSpace(userInput)) { view.ResetView(); return; }
-
-        string user = Normalize(userInput);
-        bool isCorrect = false;
-
-        foreach (var word in model.CorrectWords)
+        if (string.IsNullOrWhiteSpace(userInput))
         {
-            if (Normalize(word) == user) { isCorrect = true; break; }
+            view.ResetView();
+            return;
         }
+
+        bool isCorrect = IsCorrectAnswer(userInput);
 
         if (isCorrect)
         {
@@ -82,27 +87,40 @@ public class WordQuizController : MonoBehaviour, IExerciseController
         {
             view.SetWrong();
         }
-        
-        ProgressManager.Instance.ShowNextButton();
+
+        ProgressManager.Instance?.ShowNextButton();
     }
 
-    IEnumerator NextAfterDelay()
+    private bool IsCorrectAnswer(string userInput)
     {
-        yield return new WaitForSeconds(ProgressManager.Instance.nextExerciseDelay);
+        string[] correctWords = model.CorrectWords;
+        if (correctWords == null)
+            return false;
+
+        foreach (string word in correctWords)
+        {
+            if (ProjectUtilities.SameAnswer(word, userInput))
+                return true;
+        }
+
+        return false;
+    }
+
+    private IEnumerator NextAfterDelay()
+    {
+        float delay = ProgressManager.Instance != null ? ProgressManager.Instance.nextExerciseDelay : 0f;
+        yield return new WaitForSeconds(delay);
 
         currentIndex++;
-        if (currentIndex < currentData.questions.Count)
+
+        if (currentData != null && currentData.questions != null && currentIndex < currentData.questions.Count)
             ShowQuestion();
         else
-            ProgressManager.Instance.ShowNextButton();
+            ProgressManager.Instance?.ShowNextButton();
     }
-
-    string Normalize(string input) =>
-        System.Text.RegularExpressions.Regex
-            .Replace(input.ToLower().Trim(), @"\s+", " ");
 
     public void OnExerciseLeave()
     {
-        view.ResetView();
+        view?.ResetView();
     }
 }

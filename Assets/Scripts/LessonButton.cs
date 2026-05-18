@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+using System.Text;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
@@ -13,8 +15,7 @@ public class LessonButton : MonoBehaviour
 
     private void Awake()
     {
-        button = GetComponent<Button>();
-        image = GetComponent<Image>();
+        ResolveComponents();
         lessonNumber = GetLessonNumber();
     }
 
@@ -25,9 +26,10 @@ public class LessonButton : MonoBehaviour
 
     private void OnEnable()
     {
-        if (button == null) button = GetComponent<Button>();
-        if (image == null) image = GetComponent<Image>();
-        if (lessonNumber <= 0) lessonNumber = GetLessonNumber();
+        ResolveComponents();
+
+        if (lessonNumber <= 0)
+            lessonNumber = GetLessonNumber();
 
         RefreshState();
     }
@@ -40,39 +42,61 @@ public class LessonButton : MonoBehaviour
             return;
         }
 
-        if (ProgressManager.Instance == null)
-        {
-            Debug.LogError("LessonButton: ProgressManager не найден в сцене.");
-            return;
-        }
-
-        LessonData selectedLesson = lessonData;
-        if (selectedLesson == null && lessonNumber > 0 && ProgressManager.Instance.lessons != null && ProgressManager.Instance.lessons.Count >= lessonNumber)
-            selectedLesson = ProgressManager.Instance.lessons[lessonNumber - 1];
-
+        LessonData selectedLesson = ResolveLessonData();
         if (selectedLesson == null)
         {
             Debug.LogError($"LessonButton: lessonData не назначен для {gameObject.name}.");
             return;
         }
 
-        ProgressManager.Instance.lessons.Clear();
-        ProgressManager.Instance.lessons.Add(selectedLesson);
+        ProgressManager progressManager = ProgressManager.Instance;
+        if (progressManager == null)
+        {
+            Debug.LogError("LessonButton: ProgressManager не найден в сцене.");
+            return;
+        }
 
-        SceneManager.LoadScene("LessonScene");
+        if (progressManager.lessons == null)
+            progressManager.lessons = new List<LessonData>();
+
+        progressManager.lessons.Clear();
+        progressManager.lessons.Add(selectedLesson);
+
+        SceneManager.LoadScene(SceneNames.LessonScene);
+    }
+
+    private void ResolveComponents()
+    {
+        if (button == null)
+            button = GetComponent<Button>();
+
+        if (image == null)
+            image = GetComponent<Image>();
+    }
+
+    private LessonData ResolveLessonData()
+    {
+        if (lessonData != null)
+            return lessonData;
+
+        ProgressManager progressManager = ProgressManager.Instance;
+        if (progressManager == null || progressManager.lessons == null)
+            return null;
+
+        return lessonNumber > 0 && progressManager.lessons.Count >= lessonNumber
+            ? progressManager.lessons[lessonNumber - 1]
+            : null;
     }
 
     private void RefreshState()
     {
-        if (lessonNumber <= 0) return;
-
-        bool completed = IsCompleted();
-        bool unlocked = IsUnlocked();
+        if (lessonNumber <= 0)
+            return;
 
         if (button != null)
-            button.interactable = unlocked;
+            button.interactable = IsUnlocked();
 
-        if (completed && image != null && doneLessonSprite != null)
+        if (IsCompleted() && image != null && doneLessonSprite != null)
             image.sprite = doneLessonSprite;
     }
 
@@ -89,15 +113,15 @@ public class LessonButton : MonoBehaviour
     private int GetLessonNumber()
     {
         string objectName = gameObject.name;
-        string digits = "";
+        var digits = new StringBuilder();
 
-        for (int i = 0; i < objectName.Length; i++)
+        foreach (char character in objectName)
         {
-            if (char.IsDigit(objectName[i]))
-                digits += objectName[i];
+            if (char.IsDigit(character))
+                digits.Append(character);
         }
 
-        if (int.TryParse(digits, out int parsedNumber))
+        if (int.TryParse(digits.ToString(), out int parsedNumber))
             return parsedNumber;
 
         Debug.LogWarning($"LessonButton: не удалось определить номер урока из имени объекта '{objectName}'.");

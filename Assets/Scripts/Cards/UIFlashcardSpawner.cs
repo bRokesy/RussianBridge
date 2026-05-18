@@ -13,9 +13,10 @@ public class UIFlashcardSpawner : MonoBehaviour
 
     public Transform ContentParent => contentParent;
 
-    void Start()
+    private void Start()
     {
-        if (deck != null) SpawnAll();
+        if (deck != null)
+            SpawnAll();
     }
 
     public void LoadDeck(FlashcardDeckData newDeck)
@@ -24,46 +25,58 @@ public class UIFlashcardSpawner : MonoBehaviour
         StartCoroutine(SpawnNextFrame());
     }
 
-    IEnumerator SpawnNextFrame()
+    private IEnumerator SpawnNextFrame()
     {
-        for (int i = contentParent.childCount - 1; i >= 0; i--)
-            Destroy(contentParent.GetChild(i).gameObject);
-
+        ClearContent();
         yield return null;
         SpawnAll();
     }
 
     public void SpawnAll()
     {
-        if (deck == null || cardPrefab == null || contentParent == null) return;
+        if (deck == null || contentParent == null)
+            return;
 
-        for (int i = contentParent.childCount - 1; i >= 0; i--)
-            Destroy(contentParent.GetChild(i).gameObject);
+        GameObject prefab = GetCardPrefab();
+        if (prefab == null || deck.cards == null)
+            return;
 
-        foreach (var entry in deck.cards)
-        {
-            GameObject card;
-            
-            if (deck.isGrammarCards)
-            {
-                card = Instantiate(grammarCardPrefab, contentParent);
-            } else
-            {
-                card = Instantiate(cardPrefab, contentParent);   
-            }
+        ClearContent();
 
-            card.SetActive(false);
-            card.GetComponent<UIFlashcardFlip>()?.SetData(
-                entry.foreignWord,
-                entry.translation,
-                entry.image,
-                entry.exampleForeign,
-                entry.exampleTranslation,
-                entry.frontAudio,
-                entry.backAudio
-            );
-        }
+        foreach (FlashcardEntry entry in deck.cards)
+            SpawnCard(prefab, entry);
 
         GetComponent<FlashcardDeckManager>()?.OnDeckLoaded();
+    }
+
+    private GameObject GetCardPrefab()
+    {
+        if (deck != null && deck.isGrammarCards && grammarCardPrefab != null)
+            return grammarCardPrefab;
+
+        return cardPrefab;
+    }
+
+    private void SpawnCard(GameObject prefab, FlashcardEntry entry)
+    {
+        if (entry == null)
+            return;
+
+        GameObject card = Instantiate(prefab, contentParent);
+        card.SetActive(false);
+
+        card.GetComponent<UIFlashcardFlip>()?.SetData(
+            entry.foreignWord,
+            entry.translation,
+            entry.image,
+            entry.exampleForeign,
+            entry.exampleTranslation,
+            entry.frontAudio,
+            entry.backAudio);
+    }
+
+    private void ClearContent()
+    {
+        ProjectUtilities.DestroyChildren(contentParent);
     }
 }

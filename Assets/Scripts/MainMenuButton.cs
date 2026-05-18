@@ -3,8 +3,13 @@ using UnityEngine.SceneManagement;
 
 public class MainMenuButton : MonoBehaviour
 {
+    public void OnClick()
+    {
+        SceneManager.LoadScene(SceneNames.MainMenu);
+    }
+
     public void onClick()
     {
-        SceneManager.LoadScene("MainMenu");
+        OnClick();
     }
 }

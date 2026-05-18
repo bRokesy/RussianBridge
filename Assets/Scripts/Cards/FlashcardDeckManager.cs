@@ -1,7 +1,6 @@
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
-using TMPro;
-using System;
 
 public class FlashcardDeckManager : MonoBehaviour
 {
@@ -13,9 +12,9 @@ public class FlashcardDeckManager : MonoBehaviour
     public TextMeshProUGUI counterLabel;
 
     private UIFlashcardSpawner spawner;
-    private int currentIndex = 0;
+    private int currentIndex;
 
-    void Awake()
+    private void Awake()
     {
         spawner = GetComponent<UIFlashcardSpawner>();
         if (spawner == null)
@@ -25,67 +24,64 @@ public class FlashcardDeckManager : MonoBehaviour
         nextCardButton?.onClick.AddListener(NextCard);
     }
 
-    // Вызывается из UIFlashcardSpawner.SpawnAll() — после того как карточки готовы
+    private void OnDestroy()
+    {
+        previousCardButton?.onClick.RemoveListener(PrevCard);
+        nextCardButton?.onClick.RemoveListener(NextCard);
+    }
+
     public void OnDeckLoaded()
     {
         currentIndex = 0;
-        ShowCard(0);
+        ShowCard(currentIndex);
     }
 
     public void NextCard()
     {
         int count = CardCount();
-        if (count == 0) return;
-        if (currentIndex + 1 >= count)
-        {
-            // ProgressManager.Instance.NextExerciseNoDelay();
-        }
+        if (count == 0)
+            return;
 
         currentIndex = Mathf.Min(currentIndex + 1, count - 1);
-
         ShowCard(currentIndex);
     }
 
     public void PrevCard()
     {
         int count = CardCount();
-        if (count == 0) return;
+        if (count == 0)
+            return;
+
         currentIndex = Mathf.Max(currentIndex - 1, 0);
-
-        if (currentIndex == 0)
-        {
-            // ProgressManager.Instance.PrevExercise();
-        }
-
         ShowCard(currentIndex);
     }
 
-    void ShowCard(int index)
+    private void ShowCard(int index)
     {
-        if (spawner?.ContentParent == null) return;
+        Transform content = spawner != null ? spawner.ContentParent : null;
+        if (content == null || content.childCount == 0)
+            return;
 
-        Transform content = spawner.ContentParent;
         int count = content.childCount;
-        if (count == 0) return;
-
-        index = Mathf.Clamp(index, 0, count - 1);
+        currentIndex = Mathf.Clamp(index, 0, count - 1);
 
         for (int i = 0; i < count; i++)
-            content.GetChild(i).gameObject.SetActive(i == index);
+            content.GetChild(i).gameObject.SetActive(i == currentIndex);
 
-        content.GetChild(index).GetComponent<UIFlashcardFlip>()?.ResetToFront();
-
-        UpdateUI(index, count);
+        content.GetChild(currentIndex).GetComponent<UIFlashcardFlip>()?.ResetToFront();
+        UpdateUI(currentIndex, count);
     }
 
-    void UpdateUI(int index, int count)
+    private void UpdateUI(int index, int count)
     {
-        if (counterLabel)
+        if (counterLabel != null)
             counterLabel.text = $"{index + 1} / {count}";
-
-        // if (previousCardButton) previousCardButton.interactable = index > 0;
-        // if (nextCardButton) nextCardButton.interactable     = index < count - 1; 
     }
 
-    int CardCount() => spawner?.ContentParent != null ? spawner.ContentParent.childCount : 0;
+    private int CardCount()
+    {
+        return spawner != null && spawner.ContentParent != null
+            ? spawner.ContentParent.childCount
+            : 0;
+    }
 }

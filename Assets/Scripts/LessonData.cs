@@ -29,12 +29,18 @@ public class LessonData : ScriptableObject
         {
             switch (type)
             {
-                case ExerciseType.FillBlank:    return fillBlank    != null;
-                case ExerciseType.MakeSentence: return makeSentence != null;
-                case ExerciseType.Translate:    return translate    != null;
-                case ExerciseType.Writing:      return writing      != null;
-                case ExerciseType.Flashcards:   return flashcards   != null;
-                default: return false;
+                case ExerciseType.FillBlank:
+                    return fillBlank != null;
+                case ExerciseType.MakeSentence:
+                    return makeSentence != null;
+                case ExerciseType.Translate:
+                    return translate != null;
+                case ExerciseType.Writing:
+                    return writing != null;
+                case ExerciseType.Flashcards:
+                    return flashcards != null;
+                default:
+                    return false;
             }
         }
     }
@@ -43,13 +49,15 @@ public class LessonData : ScriptableObject
     public string lessonName;
 
     [Header("Упражнения по порядку")]
-    public List<LessonEntry> exercises;
+    public List<LessonEntry> exercises = new List<LessonEntry>();
 
     public int Count => exercises?.Count ?? 0;
 
     public LessonEntry GetExercise(int index)
     {
-        if (exercises == null || index < 0 || index >= exercises.Count) return null;
+        if (exercises == null || index < 0 || index >= exercises.Count)
+            return null;
+
         return exercises[index];
     }
 

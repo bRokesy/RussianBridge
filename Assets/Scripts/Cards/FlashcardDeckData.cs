@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -6,7 +5,7 @@ using UnityEngine;
 public class FlashcardDeckData : ScriptableObject
 {
     public string lessonTitle;
-    public Boolean isGrammarCards;
+    public bool isGrammarCards;
     public List<FlashcardEntry> cards = new List<FlashcardEntry>();
 }
 

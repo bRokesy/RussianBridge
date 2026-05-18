@@ -1,9 +1,11 @@
-using UnityEngine;
 using TMPro;
+using UnityEngine;
 using UnityEngine.UI;
 
 public class ProfileUI : MonoBehaviour
 {
+    private const string EmptyLessonText = "не выбран";
+
     [Header("Texts")]
     [SerializeField] private TMP_Text nameText;
     [SerializeField] private TMP_Text emailText;
@@ -23,38 +25,27 @@ public class ProfileUI : MonoBehaviour
 
     public void RefreshProfileUI()
     {
-        if (nameText != null)
-            nameText.text = References.userName;
+        string currentLesson = string.IsNullOrEmpty(References.currentLesson)
+            ? EmptyLessonText
+            : References.currentLesson;
 
-        if (emailText != null)
-            emailText.text = References.userEmail;
+        ProjectUtilities.SetText(nameText, References.userName);
+        ProjectUtilities.SetText(emailText, References.userEmail);
+        ProjectUtilities.SetText(languageLevelText, "Текущий урок: " + currentLesson);
+        ProjectUtilities.SetText(completedLessonsText, "Пройдено уроков: " + References.completedLessons);
+        ProjectUtilities.SetText(experienceText, "Опыт: " + References.experience);
+        ProjectUtilities.SetText(streakDaysText, "Дней подряд: " + References.streakDays);
 
-        if (languageLevelText != null)
-        {
-            string currentLesson = string.IsNullOrEmpty(References.currentLesson)
-                ? "не выбран"
-                : References.currentLesson;
+        RefreshAvatar();
+    }
 
-            languageLevelText.text = "Текущий урок: " + currentLesson;
-        }
+    private void RefreshAvatar()
+    {
+        if (avatarImage == null || avatarSprites == null || avatarSprites.Length == 0)
+            return;
 
-        if (completedLessonsText != null)
-            completedLessonsText.text = "Пройдено уроков: " + References.completedLessons;
-
-        if (experienceText != null)
-            experienceText.text = "Опыт: " + References.experience;
-
-        if (streakDaysText != null)
-            streakDaysText.text = "Дней подряд: " + References.streakDays;
-
-        if (avatarImage != null && avatarSprites != null && avatarSprites.Length > 0)
-        {
-            int id = References.avatarId;
-
-            if (id >= 0 && id < avatarSprites.Length)
-            {
-                avatarImage.sprite = avatarSprites[id];
-            }
-        }
+        int id = References.avatarId;
+        if (id >= 0 && id < avatarSprites.Length)
+            avatarImage.sprite = avatarSprites[id];
     }
 }

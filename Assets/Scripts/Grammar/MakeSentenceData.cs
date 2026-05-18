@@ -15,20 +15,14 @@ public class MakeSentenceData : ScriptableObject
         public string hint;
 
         [Tooltip("Words shown in the word bank (will be shuffled)")]
-        public List<string> shuffledWords;
+        public List<string> shuffledWords = new List<string>();
 
         [Tooltip("All accepted correct sentences")]
-        public List<string> correctSentences;
+        public List<string> correctSentences = new List<string>();
 
         public List<string> GetShuffled()
         {
-            var copy = new List<string>(shuffledWords);
-            for (int i = copy.Count - 1; i > 0; i--)
-            {
-                int j = Random.Range(0, i + 1);
-                (copy[i], copy[j]) = (copy[j], copy[i]);
-            }
-            return copy;
+            return ProjectUtilities.ShuffledCopy(shuffledWords);
         }
     }
 
@@ -36,5 +30,5 @@ public class MakeSentenceData : ScriptableObject
     public string lessonTitle;
 
     [Header("Questions")]
-    public List<Question> questions;
+    public List<Question> questions = new List<Question>();
 }

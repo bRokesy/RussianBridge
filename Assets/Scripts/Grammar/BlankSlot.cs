@@ -1,7 +1,7 @@
-using UnityEngine;
-using UnityEngine.UI;
-using UnityEngine.EventSystems;
 using TMPro;
+using UnityEngine;
+using UnityEngine.EventSystems;
+using UnityEngine.UI;
 
 public class BlankSlot : MonoBehaviour, IDropHandler, IPointerEnterHandler, IPointerExitHandler
 {
@@ -10,13 +10,13 @@ public class BlankSlot : MonoBehaviour, IDropHandler, IPointerEnterHandler, IPoi
     public TextMeshProUGUI placeholderText;
 
     [Header("Colors")]
-    public Color emptyColor  = new Color(0.85f, 0.85f, 0.9f, 1f);
-    public Color filledColor = new Color(0.8f,  0.95f, 0.8f, 1f);
-    public Color hoverColor  = new Color(0.7f,  0.85f, 1f,   1f);
+    public Color emptyColor = new Color(0.85f, 0.85f, 0.9f, 1f);
+    public Color filledColor = new Color(0.8f, 0.95f, 0.8f, 1f);
+    public Color hoverColor = new Color(0.7f, 0.85f, 1f, 1f);
 
     [Header("Size")]
-    public float minWidth  = 80f;
-    public float padding   = 16f;  // горизонтальный отступ внутри слота
+    public float minWidth = 80f;
+    public float padding = 16f;
 
     [HideInInspector] public string correctAnswer;
 
@@ -26,27 +26,25 @@ public class BlankSlot : MonoBehaviour, IDropHandler, IPointerEnterHandler, IPoi
     private LayoutElement layoutElement;
     private float defaultWidth;
 
-    void Awake()
+    private void Awake()
     {
         rectTransform = GetComponent<RectTransform>();
         layoutElement = GetComponent<LayoutElement>();
-        defaultWidth  = rectTransform.sizeDelta.x;
+        defaultWidth = rectTransform != null ? rectTransform.sizeDelta.x : minWidth;
     }
 
-    void Start()
+    private void Start()
     {
         SetEmpty();
     }
 
-    // ─── IDropHandler ────────────────────────────────────────────────────────
-
     public void OnDrop(PointerEventData eventData)
     {
         DraggableWord chip = eventData.pointerDrag?.GetComponent<DraggableWord>();
-        if (chip == null) return;
+        if (chip == null)
+            return;
 
-        if (CurrentChip != null)
-            CurrentChip.ReturnToBank();
+        CurrentChip?.ReturnToBank();
 
         if (chip.CurrentSlot != null)
             chip.CurrentSlot.ClearSlot();
@@ -56,26 +54,29 @@ public class BlankSlot : MonoBehaviour, IDropHandler, IPointerEnterHandler, IPoi
 
     public void OnPointerEnter(PointerEventData eventData)
     {
-        if (eventData.dragging)
+        if (eventData.dragging && background != null)
             background.color = hoverColor;
     }
 
     public void OnPointerExit(PointerEventData eventData)
     {
-        background.color = CurrentChip != null ? filledColor : emptyColor;
+        if (background != null)
+            background.color = CurrentChip != null ? filledColor : emptyColor;
     }
-
-    // ─── Public API ──────────────────────────────────────────────────────────
 
     public void PlaceChip(DraggableWord chip)
     {
+        if (chip == null)
+            return;
+
         CurrentChip = chip;
         chip.PlaceInSlot(this);
 
-        if (placeholderText) placeholderText.gameObject.SetActive(false);
-        background.color = filledColor;
+        placeholderText?.gameObject.SetActive(false);
 
-        // Подстроить ширину слота под чип
+        if (background != null)
+            background.color = filledColor;
+
         ResizeToChip(chip);
     }
 
@@ -88,56 +89,55 @@ public class BlankSlot : MonoBehaviour, IDropHandler, IPointerEnterHandler, IPoi
 
     public bool IsCorrect()
     {
-        if (CurrentChip == null) return false;
-        return CurrentChip.Word.Trim() == correctAnswer.Trim();
+        return CurrentChip != null && ProjectUtilities.SameAnswer(CurrentChip.Word, correctAnswer);
     }
 
-    // ─── Private ─────────────────────────────────────────────────────────────
-
-    void ResizeToChip(DraggableWord chip)
+    private void ResizeToChip(DraggableWord chip)
     {
-        // Получить предпочтительную ширину чипа
-        var chipLE = chip.GetComponent<LayoutElement>();
-        var chipRT = chip.GetComponent<RectTransform>();
-        var chipTMP = chip.GetComponentInChildren<TMPro.TextMeshProUGUI>();
+        LayoutElement chipLayout = chip.GetComponent<LayoutElement>();
+        RectTransform chipRect = chip.GetComponent<RectTransform>();
+        TextMeshProUGUI chipText = chip.GetComponentInChildren<TextMeshProUGUI>();
 
         float chipWidth = minWidth;
 
-        if (chipTMP != null)
-            chipWidth = Mathf.Max(chipTMP.preferredWidth + padding, minWidth);
-        else if (chipLE != null && chipLE.preferredWidth > 0)
-            chipWidth = Mathf.Max(chipLE.preferredWidth, minWidth);
-        else if (chipRT != null)
-            chipWidth = Mathf.Max(chipRT.sizeDelta.x, minWidth);
+        if (chipText != null)
+            chipWidth = Mathf.Max(chipText.preferredWidth + padding, minWidth);
+        else if (chipLayout != null && chipLayout.preferredWidth > 0)
+            chipWidth = Mathf.Max(chipLayout.preferredWidth, minWidth);
+        else if (chipRect != null)
+            chipWidth = Mathf.Max(chipRect.sizeDelta.x, minWidth);
 
         SetWidth(chipWidth);
     }
 
-    void SetWidth(float width)
+    private void SetWidth(float width)
     {
-        // Обновить RectTransform
-        var size = rectTransform.sizeDelta;
-        rectTransform.sizeDelta = new Vector2(width, size.y);
+        if (rectTransform != null)
+        {
+            Vector2 size = rectTransform.sizeDelta;
+            rectTransform.sizeDelta = new Vector2(width, size.y);
+        }
 
-        // Обновить LayoutElement чтобы FlowLayoutGroup знал новую ширину
         if (layoutElement != null)
         {
             layoutElement.preferredWidth = width;
-            layoutElement.minWidth       = width;
+            layoutElement.minWidth = width;
         }
 
-        // Сообщить layout что размер изменился
-        LayoutRebuilder.MarkLayoutForRebuild(transform.parent as RectTransform);
+        if (transform.parent is RectTransform parent)
+            LayoutRebuilder.MarkLayoutForRebuild(parent);
     }
 
-    void ResetSize()
+    private void ResetSize()
     {
         SetWidth(defaultWidth > 0 ? defaultWidth : minWidth);
     }
 
-    void SetEmpty()
+    private void SetEmpty()
     {
-        if (placeholderText) placeholderText.gameObject.SetActive(true);
-        if (background)      background.color = emptyColor;
+        placeholderText?.gameObject.SetActive(true);
+
+        if (background != null)
+            background.color = emptyColor;
     }
 }

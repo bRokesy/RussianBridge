@@ -1,23 +1,23 @@
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
-using TMPro;
 
 public class GrammarProgressManager : MonoBehaviour
 {
+    public enum ExerciseType { FillBlank, MakeSentence }
+
     [System.Serializable]
     public class LessonConfig
     {
         public string lessonName;
         public ExerciseType exerciseType;
-        public List<FillBlankData> fillBlankExercises;
-        public List<MakeSentenceData> makeSentenceExercises;
+        public List<FillBlankData> fillBlankExercises = new List<FillBlankData>();
+        public List<MakeSentenceData> makeSentenceExercises = new List<MakeSentenceData>();
     }
 
-    public enum ExerciseType { FillBlank, MakeSentence }
-
     [Header("Lessons (по порядку)")]
-    public List<LessonConfig> lessons;
+    public List<LessonConfig> lessons = new List<LessonConfig>();
 
     [Header("Managers")]
     public FillBlankManager fillBlankManager;
@@ -31,37 +31,40 @@ public class GrammarProgressManager : MonoBehaviour
     public TextMeshProUGUI progressLabel;
     public Button nextButton;
     public Button prevButton;
-    
-    private int currentLesson    = 0;
-    private int currentExercise  = 0;
-    
-    // const string PREF_LESSON   = "grammar_lesson";
-    // const string PREF_EXERCISE = "grammar_exercise";
 
     public static GrammarProgressManager instance;
 
-    void Awake()
+    private int currentLesson;
+    private int currentExercise;
+
+    private void Awake()
     {
         instance = this;
     }
 
-    void Start()
+    private void Start()
     {
-        // currentLesson   = PlayerPrefs.GetInt(PREF_LESSON,   0);
-        // currentExercise = PlayerPrefs.GetInt(PREF_EXERCISE, 0);
-        
-        currentLesson   = Mathf.Clamp(currentLesson,   0, lessons.Count - 1);
-
         nextButton?.onClick.AddListener(NextExercise);
         prevButton?.onClick.AddListener(PrevExercise);
 
         LoadCurrent();
     }
 
+    private void OnDestroy()
+    {
+        nextButton?.onClick.RemoveListener(NextExercise);
+        prevButton?.onClick.RemoveListener(PrevExercise);
+
+        if (instance == this)
+            instance = null;
+    }
+
     public void NextExercise()
     {
-        var lesson = lessons[currentLesson];
-        int total  = GetExerciseCount(lesson);
+        if (!TryGetCurrentLesson(out LessonConfig lesson))
+            return;
+
+        int total = GetExerciseCount(lesson);
 
         if (currentExercise < total - 1)
         {
@@ -78,12 +81,14 @@ public class GrammarProgressManager : MonoBehaviour
             return;
         }
 
-        // SaveProgress();
         LoadCurrent();
     }
 
     public void PrevExercise()
     {
+        if (lessons == null || lessons.Count == 0)
+            return;
+
         if (currentExercise > 0)
         {
             currentExercise--;
@@ -91,39 +96,46 @@ public class GrammarProgressManager : MonoBehaviour
         else if (currentLesson > 0)
         {
             currentLesson--;
-            var prevLesson = lessons[currentLesson];
-            currentExercise = Mathf.Max(0, GetExerciseCount(prevLesson) - 1);
+            currentExercise = Mathf.Max(0, GetExerciseCount(lessons[currentLesson]) - 1);
         }
 
-        // SaveProgress();
         LoadCurrent();
     }
-    
+
     public void ResetProgress()
     {
-        currentLesson   = 0;
+        currentLesson = 0;
         currentExercise = 0;
-        // SaveProgress();
         LoadCurrent();
     }
 
-    void LoadCurrent()
+    private void LoadCurrent()
     {
-        if (lessons == null || lessons.Count == 0) return;
+        if (!TryGetCurrentLesson(out LessonConfig lesson))
+            return;
 
-        var lesson = lessons[currentLesson];
-        currentExercise = Mathf.Clamp(currentExercise, 0, GetExerciseCount(lesson) - 1);
+        int total = GetExerciseCount(lesson);
+        if (total <= 0)
+        {
+            Debug.LogWarning($"GrammarProgressManager: в уроке {lesson.lessonName} нет упражнений.");
+            return;
+        }
 
-        UpdateProgressLabel(lesson);
-        UpdateNavButtons(lesson);
+        currentExercise = Mathf.Clamp(currentExercise, 0, total - 1);
 
+        UpdateProgressLabel(lesson, total);
+        UpdateNavButtons(total);
+        LoadExercise(lesson);
+    }
+
+    private void LoadExercise(LessonConfig lesson)
+    {
         switch (lesson.exerciseType)
         {
             case ExerciseType.FillBlank:
                 ShowPanel(fillBlankPanel, makeSentencePanel);
                 fillBlankManager?.LoadExercise(lesson.fillBlankExercises[currentExercise]);
                 break;
-
             case ExerciseType.MakeSentence:
                 ShowPanel(makeSentencePanel, fillBlankPanel);
                 makeSentenceManager?.LoadExercise(lesson.makeSentenceExercises[currentExercise]);
@@ -131,49 +143,61 @@ public class GrammarProgressManager : MonoBehaviour
         }
     }
 
-    int GetExerciseCount(LessonConfig lesson)
+    private bool TryGetCurrentLesson(out LessonConfig lesson)
+    {
+        lesson = null;
+
+        if (lessons == null || lessons.Count == 0)
+        {
+            Debug.LogWarning("GrammarProgressManager: список lessons пустой.");
+            return false;
+        }
+
+        currentLesson = Mathf.Clamp(currentLesson, 0, lessons.Count - 1);
+        lesson = lessons[currentLesson];
+
+        return lesson != null;
+    }
+
+    private static int GetExerciseCount(LessonConfig lesson)
     {
         return lesson.exerciseType == ExerciseType.FillBlank
             ? lesson.fillBlankExercises?.Count ?? 0
             : lesson.makeSentenceExercises?.Count ?? 0;
     }
 
-    void ShowPanel(GameObject show, GameObject hide)
+    private static void ShowPanel(GameObject show, GameObject hide)
     {
-        if (show) show.SetActive(true);
-        if (hide) hide.SetActive(false);
+        show?.SetActive(true);
+        hide?.SetActive(false);
     }
 
-    void UpdateProgressLabel(LessonConfig lesson)
+    private void UpdateProgressLabel(LessonConfig lesson, int total)
     {
-        if (progressLabel == null) return;
-        int total = GetExerciseCount(lesson);
-        progressLabel.text = $"{lesson.lessonName}  •  {currentExercise + 1} / {total}";
+        if (progressLabel != null)
+            progressLabel.text = $"{lesson.lessonName}  •  {currentExercise + 1} / {total}";
     }
 
-    void UpdateNavButtons(LessonConfig lesson)
+    private void UpdateNavButtons(int total)
     {
         bool isFirst = currentLesson == 0 && currentExercise == 0;
-        bool isLast  = currentLesson == lessons.Count - 1
-                    && currentExercise == GetExerciseCount(lesson) - 1;
+        bool isLast = currentLesson == lessons.Count - 1 && currentExercise == total - 1;
 
-        if (prevButton) prevButton.interactable = !isFirst;
-        if (nextButton) nextButton.interactable = !isLast;
+        if (prevButton != null)
+            prevButton.interactable = !isFirst;
+
+        if (nextButton != null)
+            nextButton.interactable = !isLast;
     }
 
-    // void SaveProgress()
-    // {
-    //     PlayerPrefs.SetInt(PREF_LESSON,   currentLesson);
-    //     PlayerPrefs.SetInt(PREF_EXERCISE, currentExercise);
-    //     PlayerPrefs.Save();
-    // }
-
-    void OnAllLessonsComplete()
+    private void OnAllLessonsComplete()
     {
-        if (progressLabel)
+        if (progressLabel != null)
             progressLabel.text = "Все уроки пройдены!";
-        if (nextButton)
+
+        if (nextButton != null)
             nextButton.interactable = false;
+
         Debug.Log("GrammarProgressManager: все уроки завершены.");
     }
 }

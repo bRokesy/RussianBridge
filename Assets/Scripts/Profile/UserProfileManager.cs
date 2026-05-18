@@ -1,203 +1,110 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
-using UnityEngine;
 using Firebase.Firestore;
+using UnityEngine;
 
 public class UserProfileManager : MonoBehaviour
 {
     private FirebaseFirestore database;
 
-    private void Start()
+    private void Awake()
     {
         database = FirebaseFirestore.DefaultInstance;
     }
 
     public void UpdateName(string newName)
     {
-        StartCoroutine(UpdateNameAsync(newName));
-    }
-
-    private IEnumerator UpdateNameAsync(string newName)
-    {
-        string uid = References.userId;
-
-        if (string.IsNullOrEmpty(uid))
-        {
-            Debug.LogError("UID пользователя пустой");
-            yield break;
-        }
-
-        DocumentReference docRef = database.Collection("users").Document(uid);
-
-        Dictionary<string, object> updates = new Dictionary<string, object>
-        {
-            { "Name", newName }
-        };
-
-        var updateTask = docRef.UpdateAsync(updates);
-
-        yield return new WaitUntil(() => updateTask.IsCompleted);
-
-        if (updateTask.Exception != null)
-        {
-            Debug.LogError("Ошибка обновления имени: " + updateTask.Exception);
-        }
-        else
-        {
-            References.userName = newName;
-            Debug.Log("Имя обновлено: " + newName);
-        }
+        StartCoroutine(UpdateUserFieldAsync(
+            FirestoreFields.Name,
+            newName,
+            "name",
+            () => References.userName = newName));
     }
 
     public void UpdateAvatar(int newAvatarId)
     {
-        StartCoroutine(UpdateAvatarAsync(newAvatarId));
-    }
-
-    private IEnumerator UpdateAvatarAsync(int newAvatarId)
-    {
-        string uid = References.userId;
-
-        if (string.IsNullOrEmpty(uid))
-        {
-            Debug.LogError("UID пользователя пустой");
-            yield break;
-        }
-
-        DocumentReference docRef = database.Collection("users").Document(uid);
-
-        Dictionary<string, object> updates = new Dictionary<string, object>
-        {
-            { "AvatarId", newAvatarId }
-        };
-
-        var updateTask = docRef.UpdateAsync(updates);
-
-        yield return new WaitUntil(() => updateTask.IsCompleted);
-
-        if (updateTask.Exception != null)
-        {
-            Debug.LogError("Ошибка обновления аватара: " + updateTask.Exception);
-        }
-        else
-        {
-            References.avatarId = newAvatarId;
-            Debug.Log("Аватар обновлён: " + newAvatarId);
-        }
+        StartCoroutine(UpdateUserFieldAsync(
+            FirestoreFields.AvatarId,
+            newAvatarId,
+            "avatar",
+            () => References.avatarId = newAvatarId));
     }
 
     public void AddExperience(int amount)
     {
-        StartCoroutine(AddExperienceAsync(amount));
-    }
-
-    private IEnumerator AddExperienceAsync(int amount)
-    {
-        string uid = References.userId;
-
-        if (string.IsNullOrEmpty(uid))
-        {
-            Debug.LogError("UID пользователя пустой");
-            yield break;
-        }
-
         int newExperience = References.experience + amount;
 
-        DocumentReference docRef = database.Collection("users").Document(uid);
-
-        Dictionary<string, object> updates = new Dictionary<string, object>
-        {
-            { "Experience", newExperience }
-        };
-
-        var updateTask = docRef.UpdateAsync(updates);
-
-        yield return new WaitUntil(() => updateTask.IsCompleted);
-
-        if (updateTask.Exception != null)
-        {
-            Debug.LogError("Ошибка обновления опыта: " + updateTask.Exception);
-        }
-        else
-        {
-            References.experience = newExperience;
-            Debug.Log("Опыт обновлён: " + newExperience);
-        }
+        StartCoroutine(UpdateUserFieldAsync(
+            FirestoreFields.Experience,
+            newExperience,
+            "experience",
+            () => References.experience = newExperience));
     }
 
     public void CompleteLesson()
     {
-        StartCoroutine(CompleteLessonAsync());
-    }
-
-    private IEnumerator CompleteLessonAsync()
-    {
-        string uid = References.userId;
-
-        if (string.IsNullOrEmpty(uid))
-        {
-            Debug.LogError("UID пользователя пустой");
-            yield break;
-        }
-
         int newCompletedLessons = References.completedLessons + 1;
 
-        DocumentReference docRef = database.Collection("users").Document(uid);
-
-        Dictionary<string, object> updates = new Dictionary<string, object>
-        {
-            { "CompletedLessons", newCompletedLessons }
-        };
-
-        var updateTask = docRef.UpdateAsync(updates);
-
-        yield return new WaitUntil(() => updateTask.IsCompleted);
-
-        if (updateTask.Exception != null)
-        {
-            Debug.LogError("Ошибка обновления количества уроков: " + updateTask.Exception);
-        }
-        else
-        {
-            References.completedLessons = newCompletedLessons;
-            Debug.Log("Пройдено уроков: " + newCompletedLessons);
-        }
+        StartCoroutine(UpdateUserFieldAsync(
+            FirestoreFields.CompletedLessons,
+            newCompletedLessons,
+            "completed lessons",
+            () => References.completedLessons = newCompletedLessons));
     }
 
     public void UpdateLanguageLevel(string newLevel)
     {
-        StartCoroutine(UpdateLanguageLevelAsync(newLevel));
+        StartCoroutine(UpdateUserFieldAsync(
+            FirestoreFields.LanguageLevel,
+            newLevel,
+            "language level",
+            () => References.languageLevel = newLevel));
     }
 
-    private IEnumerator UpdateLanguageLevelAsync(string newLevel)
+    private IEnumerator UpdateUserFieldAsync(string fieldName, object value, string logName, Action onSuccess)
     {
-        string uid = References.userId;
-
-        if (string.IsNullOrEmpty(uid))
-        {
-            Debug.LogError("UID пользователя пустой");
+        if (!TryGetUserDocument(out DocumentReference docRef))
             yield break;
-        }
-
-        DocumentReference docRef = database.Collection("users").Document(uid);
 
         Dictionary<string, object> updates = new Dictionary<string, object>
         {
-            { "LanguageLevel", newLevel }
+            { fieldName, value }
         };
 
         var updateTask = docRef.UpdateAsync(updates);
-
         yield return new WaitUntil(() => updateTask.IsCompleted);
 
         if (updateTask.Exception != null)
         {
-            Debug.LogError("Ошибка обновления уровня языка: " + updateTask.Exception);
+            Debug.LogError($"Failed to update {logName}: {updateTask.Exception}");
+            yield break;
         }
-        else
+
+        onSuccess?.Invoke();
+        Debug.Log($"Updated {logName}: {value}");
+    }
+
+    private bool TryGetUserDocument(out DocumentReference docRef)
+    {
+        docRef = null;
+
+        if (string.IsNullOrEmpty(References.userId))
         {
-            References.languageLevel = newLevel;
-            Debug.Log("Уровень языка обновлён: " + newLevel);
+            Debug.LogError("User UID is empty.");
+            return false;
         }
+
+        if (database == null)
+            database = FirebaseFirestore.DefaultInstance;
+
+        if (database == null)
+        {
+            Debug.LogError("Firestore is not initialized.");
+            return false;
+        }
+
+        docRef = database.Collection(FirestoreCollections.Users).Document(References.userId);
+        return true;
     }
 }

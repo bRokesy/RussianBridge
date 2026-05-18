@@ -1,18 +1,20 @@
+using System;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
 public class OptionButtonUI : MonoBehaviour
 {
+    private static readonly Color CorrectColor = new Color(0.6f, 1f, 0.6f);
+    private static readonly Color WrongColor = new Color(1f, 0.6f, 0.6f);
+
     private Button button;
     private Image background;
     private TextMeshProUGUI label;
-
-    private System.Action<OptionButtonUI> onClick;
+    private Action<OptionButtonUI> onClick;
+    private Color defaultColor;
 
     public string Value { get; private set; }
-
-    private Color defaultColor;
 
     private void Awake()
     {
@@ -23,38 +25,53 @@ public class OptionButtonUI : MonoBehaviour
         if (background != null)
             defaultColor = background.color;
 
-        if (button != null)
-            button.onClick.AddListener(() => onClick?.Invoke(this));
+        button?.onClick.AddListener(OnButtonClicked);
     }
 
-    public void Setup(string value, System.Action<OptionButtonUI> clickCallback)
+    private void OnDestroy()
+    {
+        button?.onClick.RemoveListener(OnButtonClicked);
+    }
+
+    public void Setup(string value, Action<OptionButtonUI> clickCallback)
     {
         Value = value;
         onClick = clickCallback;
 
-        if (label) label.text = value;
-
+        ProjectUtilities.SetText(label, value);
         ResetColor();
         SetInteractable(true);
     }
 
     public void SetCorrect()
     {
-        if (background) background.color = new Color(0.6f, 1f, 0.6f);
+        SetBackgroundColor(CorrectColor);
     }
 
     public void SetWrong()
     {
-        if (background) background.color = new Color(1f, 0.6f, 0.6f);
+        SetBackgroundColor(WrongColor);
     }
 
     public void ResetColor()
     {
-        if (background) background.color = defaultColor;
+        SetBackgroundColor(defaultColor);
     }
 
     public void SetInteractable(bool state)
     {
-        if (button) button.interactable = state;
+        if (button != null)
+            button.interactable = state;
+    }
+
+    private void OnButtonClicked()
+    {
+        onClick?.Invoke(this);
+    }
+
+    private void SetBackgroundColor(Color color)
+    {
+        if (background != null)
+            background.color = color;
     }
 }

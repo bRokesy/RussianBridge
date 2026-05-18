@@ -9,7 +9,7 @@ public class TranslateData : ScriptableObject
     {
         public string foreignWord;
         public string correctTranslation;
-        public string[] options;
+        public string[] options = System.Array.Empty<string>();
 
         [Tooltip("Опционально — картинка к вопросу")]
         public Sprite image;
@@ -22,5 +22,5 @@ public class TranslateData : ScriptableObject
     public string lessonTitle;
 
     [Header("Questions")]
-    public List<Question> questions;
+    public List<Question> questions = new List<Question>();
 }

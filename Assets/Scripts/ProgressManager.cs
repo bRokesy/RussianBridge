@@ -1,10 +1,12 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
-using UnityEngine;
-using UnityEngine.UI;
-using UnityEngine.SceneManagement;
-using TMPro;
+using System.IO;
 using Firebase.Firestore;
+using TMPro;
+using UnityEngine;
+using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
 public class ProgressManager : MonoBehaviour
 {
@@ -23,45 +25,48 @@ public class ProgressManager : MonoBehaviour
     public Button prevButton;
     public Slider progressBar;
 
-    private int currentLesson   = 0;
-    private int currentExercise = 0;
+    private int currentLesson;
+    private int currentExercise;
     private int lastSyncedLesson = -1;
+    private int lastSyncedExercise = -1;
     private FirebaseFirestore database;
     private SceneUIPanels scenePanels;
 
-    // ─── Lifecycle ────────────────────────────────────────────────────────────
-
-    void Awake()
+    private void Awake()
     {
-        if (Instance != null && Instance != this) { Destroy(gameObject); return; }
+        if (Instance != null && Instance != this)
+        {
+            Destroy(gameObject);
+            return;
+        }
+
         Instance = this;
         DontDestroyOnLoad(gameObject);
-        database = FirebaseFirestore.DefaultInstance;
 
+        database = FirebaseFirestore.DefaultInstance;
         SceneManager.sceneLoaded += OnSceneLoaded;
     }
 
-    void Start()
+    private void Start()
     {
+        ResolveNavigationReferences();
         BindButtons();
         StartCoroutine(LoadAfterFrame());
     }
 
-    IEnumerator LoadAfterFrame()
+    private IEnumerator LoadAfterFrame()
     {
         yield return null;
         LoadCurrent();
     }
 
-    void BindButtons()
+    private void BindButtons()
     {
         nextButton?.onClick.RemoveAllListeners();
         prevButton?.onClick.RemoveAllListeners();
         nextButton?.onClick.AddListener(NextExerciseNoDelay);
         prevButton?.onClick.AddListener(PrevExercise);
     }
-
-    // ─── Navigation ───────────────────────────────────────────────────────────
 
     public void NextExercise()
     {
@@ -73,14 +78,9 @@ public class ProgressManager : MonoBehaviour
         StartCoroutine(NextExerciseDelayed(0f));
     }
 
-    /// <summary>
-    /// Вызывается менеджерами когда упражнение завершено.
-    /// Показывает NextButton вместо автоперехода.
-    /// </summary>
     public void ShowNextButton()
     {
-        if (nextButton == null)
-            nextButton = GameObject.Find("NextButton")?.GetComponent<Button>();
+        ResolveNextButton();
 
         if (nextButton == null)
         {
@@ -92,14 +92,20 @@ public class ProgressManager : MonoBehaviour
         nextButton.interactable = true;
     }
 
-    IEnumerator NextExerciseDelayed(float delay)
+    private IEnumerator NextExerciseDelayed(float delay)
     {
-        if (nextButton) nextButton.gameObject.SetActive(false);
+        if (!TryGetCurrentLesson(out LessonData lesson))
+            yield break;
+
+        if (nextButton != null)
+            nextButton.gameObject.SetActive(false);
+
         yield return new WaitForSeconds(delay);
 
-        var lesson = lessons[currentLesson];
         if (currentExercise < lesson.Count - 1)
+        {
             currentExercise++;
+        }
         else if (currentLesson < lessons.Count - 1)
         {
             yield return StartCoroutine(SendLessonCompleteToFirebase(currentLesson));
@@ -120,7 +126,9 @@ public class ProgressManager : MonoBehaviour
     public void PrevExercise()
     {
         if (currentExercise > 0)
+        {
             currentExercise--;
+        }
         else if (currentLesson > 0)
         {
             currentLesson--;
@@ -133,62 +141,39 @@ public class ProgressManager : MonoBehaviour
 
     public void ResetProgress()
     {
-        currentLesson   = 0;
+        currentLesson = 0;
         currentExercise = 0;
+        lastSyncedLesson = -1;
+        lastSyncedExercise = -1;
+
         SaveProgress();
         LoadCurrent();
     }
 
-    // ─── Panels ───────────────────────────────────────────────────────────────
-
     public void RegisterPanels(SceneUIPanels panels)
     {
         scenePanels = panels;
-        if (lessons != null && lessons.Count > 0)
-        {
-            var entry = lessons[currentLesson].GetExercise(currentExercise);
-            if (entry != null) scenePanels.ShowOnly(entry.type);
-        }
+
+        if (!TryGetCurrentEntry(out LessonData.LessonEntry entry))
+            return;
+
+        scenePanels.ShowOnly(entry.type);
     }
 
-    // ─── Load ─────────────────────────────────────────────────────────────────
     public void LoadCurrent()
     {
-        if (SceneManager.GetActiveScene().name == "MainMenu") return;
-
-        if (lessons == null || lessons.Count == 0)
-        {
-            Debug.LogWarning("ProgressManager: список lessons пустой!");
+        if (SceneManager.GetActiveScene().name == SceneNames.MainMenu)
             return;
-        }
+
+        if (!TryGetCurrentLesson(out LessonData lesson))
+            return;
 
         NotifyLeave();
 
-        var lesson = lessons[currentLesson];
-        currentExercise = Mathf.Clamp(currentExercise, 0, Mathf.Max(0, lesson.Count - 1));
-
-        var entry = lesson.GetExercise(currentExercise);
-        if (entry == null)
-        {
-            Debug.LogWarning($"ProgressManager: упражнение {currentExercise} не найдено в {lesson.lessonName}");
+        if (!TryGetCurrentEntry(lesson, out LessonData.LessonEntry entry))
             return;
-        }
 
-        if (!entry.IsValid())
-        {
-            Debug.LogWarning($"ProgressManager: поле данных не заполнено для типа {entry.type} в {lesson.lessonName}[{currentExercise}]");
-            return;
-        }
-
-        if (!progressBar) progressBar  = GameObject.Find("ProgressBar")?.GetComponent<Slider>();
-        if (!progressLabel) progressLabel = GameObject.Find("ProgressText")?.GetComponent<TextMeshProUGUI>();
-        if (!nextButton)
-        {
-            nextButton = GameObject.Find("NextButton")?.GetComponent<Button>();
-            Image nextButtonImage = nextButton?.gameObject.GetComponent<Image>();
-            if (nextButtonImage != null)
-                nextButtonImage.enabled = true;
-        }
+        ResolveNavigationReferences();
 
         CurrentLessonTitle = lesson.lessonName;
         SyncCurrentLessonToFirebase(lesson);
@@ -196,137 +181,229 @@ public class ProgressManager : MonoBehaviour
 
         Debug.Log($"ProgressManager: {lesson.lessonName} [{currentExercise + 1}/{lesson.Count}] тип: {entry.type}");
 
-        switch (entry.type)
-        {
-            case LessonData.ExerciseType.FillBlank:
-                FindAndLoad<FillBlankManager>(m => m.LoadExercise(entry.fillBlank));
-                break;
-            case LessonData.ExerciseType.MakeSentence:
-                FindAndLoad<MakeSentenceManager>(m => m.LoadExercise(entry.makeSentence));
-                break;
-            case LessonData.ExerciseType.Translate:
-                FindAndLoad<TranslationQuizManager>(m => m.LoadExercise(entry.translate));
-                break;
-            case LessonData.ExerciseType.Writing:
-                FindAndLoad<WordQuizController>(m => m.LoadExercise(entry.writing));
-                break;
-            case LessonData.ExerciseType.Flashcards:
-                FindAndLoad<UIFlashcardSpawner>(m => m.LoadDeck(entry.flashcards));
-                break;
-        }
-
+        LoadExercise(entry);
         UpdateUI(lesson, entry.type);
     }
 
-    // ─── Helpers ──────────────────────────────────────────────────────────────
-
-    void NotifyLeave()
+    private void LoadExercise(LessonData.LessonEntry entry)
     {
-        foreach (var mono in FindObjectsByType<MonoBehaviour>(FindObjectsSortMode.None))
+        switch (entry.type)
         {
-            if (mono is IExerciseController ec)
-                ec.OnExerciseLeave();
+            case LessonData.ExerciseType.FillBlank:
+                FindAndLoad<FillBlankManager>(manager => manager.LoadExercise(entry.fillBlank));
+                break;
+            case LessonData.ExerciseType.MakeSentence:
+                FindAndLoad<MakeSentenceManager>(manager => manager.LoadExercise(entry.makeSentence));
+                break;
+            case LessonData.ExerciseType.Translate:
+                FindAndLoad<TranslationQuizManager>(manager => manager.LoadExercise(entry.translate));
+                break;
+            case LessonData.ExerciseType.Writing:
+                FindAndLoad<WordQuizController>(manager => manager.LoadExercise(entry.writing));
+                break;
+            case LessonData.ExerciseType.Flashcards:
+                FindAndLoad<UIFlashcardSpawner>(manager => manager.LoadDeck(entry.flashcards));
+                break;
+            default:
+                Debug.LogWarning($"ProgressManager: неподдерживаемый тип упражнения {entry.type}.");
+                break;
         }
     }
 
-    void FindAndLoad<T>(System.Action<T> action) where T : Object
+    private void NotifyLeave()
     {
-        var manager = FindFirstObjectByType<T>();
+        foreach (MonoBehaviour mono in FindObjectsByType<MonoBehaviour>(FindObjectsSortMode.None))
+        {
+            if (mono is IExerciseController exerciseController)
+                exerciseController.OnExerciseLeave();
+        }
+    }
+
+    private void FindAndLoad<T>(Action<T> action) where T : UnityEngine.Object
+    {
+        T manager = FindFirstObjectByType<T>();
+
         if (manager != null)
             action(manager);
         else
             Debug.LogWarning($"ProgressManager: {typeof(T).Name} не найден в сцене.");
     }
 
-    void UpdateUI(LessonData lesson, LessonData.ExerciseType type)
+    private void UpdateUI(LessonData lesson, LessonData.ExerciseType type)
     {
-        if (progressLabel)
+        if (progressLabel != null)
             progressLabel.text = $"{lesson.lessonName}  •  {currentExercise + 1} / {lesson.Count}";
-        if (progressBar)
+
+        if (progressBar != null)
         {
             progressBar.maxValue = lesson.Count;
-            progressBar.value    = currentExercise + 1;
+            progressBar.value = currentExercise + 1;
         }
 
-        if (prevButton) prevButton.interactable = !(currentLesson == 0 && currentExercise == 0);
+        if (prevButton != null)
+            prevButton.interactable = currentLesson != 0 || currentExercise != 0;
 
-        // NextButton: для Flashcards всегда видна, для остальных скрыта до завершения
         if (nextButton != null)
-        {
-            bool isFlashcards = type == LessonData.ExerciseType.Flashcards;
-            nextButton.gameObject.SetActive(isFlashcards);
-
-            print(lesson.exerciseType);
-            print(isFlashcards);
-        }
+            nextButton.gameObject.SetActive(type == LessonData.ExerciseType.Flashcards);
     }
 
-    void SaveProgress()
+    private bool TryGetCurrentLesson(out LessonData lesson)
+    {
+        lesson = null;
+
+        if (lessons == null || lessons.Count == 0)
+        {
+            Debug.LogWarning("ProgressManager: список lessons пустой.");
+            return false;
+        }
+
+        currentLesson = Mathf.Clamp(currentLesson, 0, lessons.Count - 1);
+        lesson = lessons[currentLesson];
+
+        if (lesson == null)
+        {
+            Debug.LogWarning($"ProgressManager: урок {currentLesson} не назначен.");
+            return false;
+        }
+
+        if (lesson.Count <= 0)
+        {
+            Debug.LogWarning($"ProgressManager: в уроке {lesson.lessonName} нет упражнений.");
+            return false;
+        }
+
+        currentExercise = Mathf.Clamp(currentExercise, 0, lesson.Count - 1);
+        return true;
+    }
+
+    private bool TryGetCurrentEntry(out LessonData.LessonEntry entry)
+    {
+        entry = null;
+        return TryGetCurrentLesson(out LessonData lesson) && TryGetCurrentEntry(lesson, out entry);
+    }
+
+    private bool TryGetCurrentEntry(LessonData lesson, out LessonData.LessonEntry entry)
+    {
+        entry = lesson.GetExercise(currentExercise);
+
+        if (entry == null)
+        {
+            Debug.LogWarning($"ProgressManager: упражнение {currentExercise} не найдено в {lesson.lessonName}.");
+            return false;
+        }
+
+        if (!entry.IsValid())
+        {
+            Debug.LogWarning($"ProgressManager: данные не заполнены для типа {entry.type} в {lesson.lessonName}[{currentExercise}].");
+            return false;
+        }
+
+        return true;
+    }
+
+    private void ResolveNavigationReferences()
+    {
+        if (progressBar == null)
+            progressBar = GameObject.Find(SceneObjectNames.ProgressBar)?.GetComponent<Slider>();
+
+        if (progressLabel == null)
+            progressLabel = GameObject.Find(SceneObjectNames.ProgressText)?.GetComponent<TextMeshProUGUI>();
+
+        ResolveNextButton();
+    }
+
+    private void ResolveNextButton()
+    {
+        if (nextButton != null)
+            return;
+
+        nextButton = GameObject.Find(SceneObjectNames.NextButton)?.GetComponent<Button>();
+
+        Image nextButtonImage = nextButton?.GetComponent<Image>();
+        if (nextButtonImage != null)
+            nextButtonImage.enabled = true;
+    }
+
+    private void SaveProgress()
     {
         PlayerPrefs.Save();
     }
 
-    void SyncCurrentLessonToFirebase(LessonData lesson)
+    private void SyncCurrentLessonToFirebase(LessonData lesson)
     {
-        if (lesson == null || currentLesson == lastSyncedLesson) return;
-        if (string.IsNullOrEmpty(References.userId)) return;
+        if (lesson == null)
+            return;
+
+        if (currentLesson == lastSyncedLesson && currentExercise == lastSyncedExercise)
+            return;
+
+        if (string.IsNullOrEmpty(References.userId))
+            return;
 
         lastSyncedLesson = currentLesson;
+        lastSyncedExercise = currentExercise;
+
         References.currentLesson = lesson.lessonName;
         StartCoroutine(SendCurrentLessonToFirebase(lesson));
     }
 
-    IEnumerator SendCurrentLessonToFirebase(LessonData lesson)
+    private IEnumerator SendCurrentLessonToFirebase(LessonData lesson)
     {
         string uid = References.userId;
 
         if (string.IsNullOrEmpty(uid))
         {
-            Debug.LogWarning("ProgressManager: UID is empty, current lesson was not sent to Firebase.");
+            Debug.LogWarning("ProgressManager: UID пустой, текущий урок не отправлен в Firebase.");
             yield break;
         }
 
-        if (database == null) database = FirebaseFirestore.DefaultInstance;
+        EnsureDatabase();
 
-        DocumentReference userRef = database.Collection("users").Document(uid);
+        Timestamp now = Timestamp.GetCurrentTimestamp();
         Dictionary<string, object> updates = new Dictionary<string, object>
         {
-            { "CurrentLesson", lesson.lessonName },
-            { "CurrentLessonIndex", currentLesson },
-            { "CurrentExerciseIndex", currentExercise },
-            { "CurrentLessonUpdatedAt", Timestamp.GetCurrentTimestamp() }
+            { FirestoreFields.CurrentLesson, lesson.lessonName },
+            { FirestoreFields.CurrentLessonIndex, currentLesson },
+            { FirestoreFields.CurrentExerciseIndex, currentExercise },
+            { FirestoreFields.CurrentLessonUpdatedAt, now }
         };
 
+        DocumentReference userRef = database.Collection(FirestoreCollections.Users).Document(uid);
         var updateTask = userRef.SetAsync(updates, SetOptions.MergeAll);
+
         yield return new WaitUntil(() => updateTask.IsCompleted);
 
         if (updateTask.Exception != null)
-            Debug.LogWarning("ProgressManager: failed to send current lesson to Firebase: " + updateTask.Exception);
+            Debug.LogWarning("ProgressManager: не удалось отправить текущий урок в Firebase: " + updateTask.Exception);
     }
 
-    IEnumerator SendLessonCompleteToFirebase(int lessonIndex)
+    private IEnumerator SendLessonCompleteToFirebase(int lessonIndex)
     {
         string uid = References.userId;
 
         if (string.IsNullOrEmpty(uid))
         {
-            Debug.LogWarning("ProgressManager: UID is empty, lesson completion was not sent to Firebase.");
+            Debug.LogWarning("ProgressManager: UID пустой, завершение урока не отправлено в Firebase.");
             yield break;
         }
 
-        if (database == null) database = FirebaseFirestore.DefaultInstance;
+        if (lessons == null || lessonIndex < 0 || lessonIndex >= lessons.Count)
+            yield break;
+
+        EnsureDatabase();
 
         LessonData lesson = lessons[lessonIndex];
         string lessonKey = GetLessonKey(lesson, lessonIndex);
-        DocumentReference userRef = database.Collection("users").Document(uid);
-        DocumentReference lessonRef = userRef.Collection("lessonProgress").Document(lessonKey);
+
+        DocumentReference userRef = database.Collection(FirestoreCollections.Users).Document(uid);
+        DocumentReference lessonRef = userRef.Collection(FirestoreCollections.LessonProgress).Document(lessonKey);
 
         var getTask = lessonRef.GetSnapshotAsync();
         yield return new WaitUntil(() => getTask.IsCompleted);
 
         if (getTask.Exception != null)
         {
-            Debug.LogWarning("ProgressManager: failed to read lesson progress from Firebase: " + getTask.Exception);
+            Debug.LogWarning("ProgressManager: не удалось прочитать прогресс урока из Firebase: " + getTask.Exception);
             yield break;
         }
 
@@ -336,22 +413,23 @@ public class ProgressManager : MonoBehaviour
         DocumentSnapshot snapshot = getTask.Result;
         if (snapshot.Exists)
         {
-            snapshot.TryGetValue("Score", out previousScore);
-            snapshot.TryGetValue("Completed", out wasCompleted);
+            snapshot.TryGetValue(FirestoreFields.Score, out previousScore);
+            snapshot.TryGetValue(FirestoreFields.Completed, out wasCompleted);
         }
 
         int score = 100;
         int awardedScore = Mathf.Max(0, score - previousScore);
+        Timestamp now = Timestamp.GetCurrentTimestamp();
 
         Dictionary<string, object> lessonUpdates = new Dictionary<string, object>
         {
-            { "LessonIndex", lessonIndex },
-            { "LessonName", lesson.lessonName },
-            { "TotalExercises", lesson.Count },
-            { "Score", score },
-            { "Completed", true },
-            { "CompletedAt", Timestamp.GetCurrentTimestamp() },
-            { "UpdatedAt", Timestamp.GetCurrentTimestamp() }
+            { FirestoreFields.LessonIndex, lessonIndex },
+            { FirestoreFields.LessonName, lesson.lessonName },
+            { FirestoreFields.TotalExercises, lesson.Count },
+            { FirestoreFields.Score, score },
+            { FirestoreFields.Completed, true },
+            { FirestoreFields.CompletedAt, now },
+            { FirestoreFields.UpdatedAt, now }
         };
 
         var setLessonTask = lessonRef.SetAsync(lessonUpdates, SetOptions.MergeAll);
@@ -359,20 +437,20 @@ public class ProgressManager : MonoBehaviour
 
         if (setLessonTask.Exception != null)
         {
-            Debug.LogWarning("ProgressManager: failed to send lesson progress to Firebase: " + setLessonTask.Exception);
+            Debug.LogWarning("ProgressManager: не удалось отправить прогресс урока в Firebase: " + setLessonTask.Exception);
             yield break;
         }
 
         Dictionary<string, object> userUpdates = new Dictionary<string, object>
         {
-            { "CurrentLesson", lesson.lessonName },
-            { "CurrentLessonIndex", lessonIndex },
-            { "CurrentExerciseIndex", lesson.Count - 1 },
-            { "Experience", References.experience + awardedScore },
-            { "CompletedLessons", References.completedLessons + (wasCompleted ? 0 : 1) },
-            { "LastCompletedLesson", lesson.lessonName },
-            { "LastCompletedLessonIndex", lessonIndex },
-            { "LastProgressUpdate", Timestamp.GetCurrentTimestamp() }
+            { FirestoreFields.CurrentLesson, lesson.lessonName },
+            { FirestoreFields.CurrentLessonIndex, lessonIndex },
+            { FirestoreFields.CurrentExerciseIndex, lesson.Count - 1 },
+            { FirestoreFields.Experience, References.experience + awardedScore },
+            { FirestoreFields.CompletedLessons, References.completedLessons + (wasCompleted ? 0 : 1) },
+            { FirestoreFields.LastCompletedLesson, lesson.lessonName },
+            { FirestoreFields.LastCompletedLessonIndex, lessonIndex },
+            { FirestoreFields.LastProgressUpdate, now }
         };
 
         var updateUserTask = userRef.SetAsync(userUpdates, SetOptions.MergeAll);
@@ -380,7 +458,7 @@ public class ProgressManager : MonoBehaviour
 
         if (updateUserTask.Exception != null)
         {
-            Debug.LogWarning("ProgressManager: failed to update user lesson stats in Firebase: " + updateUserTask.Exception);
+            Debug.LogWarning("ProgressManager: не удалось обновить статистику пользователя в Firebase: " + updateUserTask.Exception);
             yield break;
         }
 
@@ -388,38 +466,52 @@ public class ProgressManager : MonoBehaviour
         if (!wasCompleted) References.completedLessons++;
         References.currentLesson = lesson.lessonName;
 
-        Debug.Log($"ProgressManager: lesson '{lesson.lessonName}' completed, awarded {awardedScore}/100 points.");
+        Debug.Log($"ProgressManager: урок '{lesson.lessonName}' завершён, начислено {awardedScore}/100 очков.");
     }
 
-    string GetLessonKey(LessonData lesson, int lessonIndex)
+    private void EnsureDatabase()
+    {
+        if (database == null)
+            database = FirebaseFirestore.DefaultInstance;
+    }
+
+    private string GetLessonKey(LessonData lesson, int lessonIndex)
     {
         string source = string.IsNullOrEmpty(lesson.lessonName)
             ? $"lesson_{lessonIndex + 1}"
             : lesson.lessonName.ToLowerInvariant();
 
-        foreach (char invalidChar in System.IO.Path.GetInvalidFileNameChars())
+        foreach (char invalidChar in Path.GetInvalidFileNameChars())
             source = source.Replace(invalidChar, '_');
 
         return source.Replace(' ', '_').Replace('.', '_');
     }
 
-    void OnAllComplete()
+    private void OnAllComplete()
     {
-        if (progressLabel) progressLabel.text = "所有课程已完成!";
-        if (nextButton)    nextButton.interactable = false;
+        if (progressLabel != null)
+            progressLabel.text = "Все уроки завершены!";
+
+        if (nextButton != null)
+            nextButton.interactable = false;
 
         Destroy(gameObject);
-        SceneManager.LoadScene("MainMenu");
+        SceneManager.LoadScene(SceneNames.MainMenu);
     }
 
-    void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+    private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
+        scenePanels = null;
+        ResolveNavigationReferences();
         BindButtons();
         StartCoroutine(LoadAfterFrame());
     }
 
-    void OnDestroy()
+    private void OnDestroy()
     {
         SceneManager.sceneLoaded -= OnSceneLoaded;
+
+        if (Instance == this)
+            Instance = null;
     }
 }

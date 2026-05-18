@@ -4,6 +4,6 @@ public class NextExerciseButton : MonoBehaviour
 {
     public void OnClick()
     {
-        ProgressManager.Instance.NextExerciseNoDelay();
+        ProgressManager.Instance?.NextExerciseNoDelay();
     }
 }

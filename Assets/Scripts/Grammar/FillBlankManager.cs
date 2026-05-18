@@ -1,12 +1,13 @@
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
-using TMPro;
-using Unity.VisualScripting;
 
 public class FillBlankManager : MonoBehaviour, IExerciseController
 {
+    private static readonly string[] BlankToken = { "___" };
+
     [Header("UI References")]
     public Transform sentenceContainer;
     public Transform wordBank;
@@ -23,147 +24,167 @@ public class FillBlankManager : MonoBehaviour, IExerciseController
     public GameObject textChunkPrefab;
     public GameObject slotPrefab;
 
-    private List<DraggableWord> spawnedChips = new List<DraggableWord>();
-    private List<BlankSlot> spawnedSlots     = new List<BlankSlot>();
+    private readonly List<DraggableWord> spawnedChips = new List<DraggableWord>();
+    private readonly List<BlankSlot> spawnedSlots = new List<BlankSlot>();
     private FillBlankData currentData;
-    private int currentIndex = 0;
+    private int currentIndex;
 
-    void Start()
+    private void Start()
     {
-        checkButton.onClick.AddListener(CheckAnswer);
-        resetButton.onClick.AddListener(ResetExercise);
+        checkButton?.onClick.AddListener(CheckAnswer);
+        resetButton?.onClick.AddListener(ResetExercise);
     }
 
     public void LoadExercise(FillBlankData data)
     {
-        currentData  = data;
+        currentData = data;
         currentIndex = 0;
         ShowQuestion();
     }
 
-    void ShowQuestion()
+    private void ShowQuestion()
     {
-        if (currentData == null || currentIndex >= currentData.questions.Count) return;
+        if (currentData == null || currentData.questions == null || currentIndex >= currentData.questions.Count)
+            return;
 
-        var q = currentData.questions[currentIndex];
+        FillBlankData.Question question = currentData.questions[currentIndex];
+        if (question == null)
+            return;
 
-        feedbackText.text = "";
-        taskLabel.text    = q.taskTitle;
-        hintLabel.text    = q.hint;
+        ProjectUtilities.SetText(feedbackText, string.Empty);
+        ProjectUtilities.SetText(taskLabel, question.taskTitle);
+        ProjectUtilities.SetText(hintLabel, question.hint);
 
         ClearAll();
-        BuildSentence(q);
-        SpawnWordBank(q);
+        BuildSentence(question);
+        SpawnWordBank(question);
         StartCoroutine(ForceLayout());
     }
 
-    IEnumerator ForceLayout()
+    private IEnumerator ForceLayout()
     {
         yield return null;
-        LayoutRebuilder.ForceRebuildLayoutImmediate(
-            sentenceContainer.GetComponent<RectTransform>());
+
+        if (sentenceContainer is RectTransform rectTransform)
+            LayoutRebuilder.ForceRebuildLayoutImmediate(rectTransform);
     }
 
-    void BuildSentence(FillBlankData.Question q)
+    private void BuildSentence(FillBlankData.Question question)
     {
-        string[] parts = q.sentenceWithBlanks.Split(new string[] { "___" }, System.StringSplitOptions.None);
+        string source = question.sentenceWithBlanks ?? string.Empty;
+        string[] parts = source.Split(BlankToken, System.StringSplitOptions.None);
         int blankIndex = 0;
 
         for (int i = 0; i < parts.Length; i++)
         {
             if (!string.IsNullOrEmpty(parts[i]))
-            {
-                GameObject textGO = Instantiate(textChunkPrefab, sentenceContainer);
-                var tmp = textGO.GetComponent<TextMeshProUGUI>();
-                if (tmp) tmp.text = parts[i];
-            }
+                SpawnTextChunk(parts[i]);
 
-            if (i < parts.Length - 1 && blankIndex < q.correctAnswers.Count)
+            if (question.correctAnswers != null && i < parts.Length - 1 && blankIndex < question.correctAnswers.Count)
             {
-                GameObject slotGO = Instantiate(slotPrefab, sentenceContainer);
-                BlankSlot slot = slotGO.GetComponent<BlankSlot>();
-                slot.correctAnswer = q.correctAnswers[blankIndex];
-                spawnedSlots.Add(slot);
+                SpawnSlot(question.correctAnswers[blankIndex]);
                 blankIndex++;
             }
         }
     }
 
-    void SpawnWordBank(FillBlankData.Question q)
+    private void SpawnTextChunk(string text)
     {
-        var words = new List<string>(q.wordBankWords);
-        for (int i = words.Count - 1; i > 0; i--)
-        {
-            int j = Random.Range(0, i + 1);
-            (words[i], words[j]) = (words[j], words[i]);
-        }
+        if (textChunkPrefab == null || sentenceContainer == null)
+            return;
 
-        foreach (string word in words)
-        {
-            GameObject chip = Instantiate(wordChipPrefab, wordBank);
-            DraggableWord dw = chip.GetComponent<DraggableWord>();
-            dw.Init(word, wordBank);
-            spawnedChips.Add(dw);
-        }
+        GameObject textObject = Instantiate(textChunkPrefab, sentenceContainer);
+        TextMeshProUGUI textComponent = textObject.GetComponent<TextMeshProUGUI>();
+
+        if (textComponent != null)
+            textComponent.text = text;
+    }
+
+    private void SpawnSlot(string correctAnswer)
+    {
+        if (slotPrefab == null || sentenceContainer == null)
+            return;
+
+        GameObject slotObject = Instantiate(slotPrefab, sentenceContainer);
+        BlankSlot slot = slotObject.GetComponent<BlankSlot>();
+
+        if (slot == null)
+            return;
+
+        slot.correctAnswer = correctAnswer;
+        spawnedSlots.Add(slot);
+    }
+
+    private void SpawnWordBank(FillBlankData.Question question)
+    {
+        foreach (string word in ProjectUtilities.ShuffledCopy(question.wordBankWords))
+            SpawnWordChip(word);
+    }
+
+    private void SpawnWordChip(string word)
+    {
+        if (wordChipPrefab == null || wordBank == null)
+            return;
+
+        GameObject chipObject = Instantiate(wordChipPrefab, wordBank);
+        DraggableWord draggableWord = chipObject.GetComponent<DraggableWord>();
+
+        if (draggableWord == null)
+            return;
+
+        draggableWord.Init(word, wordBank);
+        spawnedChips.Add(draggableWord);
     }
 
     public void CheckAnswer()
     {
         int correct = 0;
-        foreach (var slot in spawnedSlots)
-            if (slot.IsCorrect()) correct++;
+
+        foreach (BlankSlot slot in spawnedSlots)
+        {
+            if (slot != null && slot.IsCorrect())
+                correct++;
+        }
 
         bool allCorrect = correct == spawnedSlots.Count;
 
         if (allCorrect)
-        {
-            // checkButton.interactable = false;
-            ProgressManager.Instance.ShowNextButton();
-        } else
-        {
-            ResetExercise();
-        }
-
-        feedbackText.text  = allCorrect ? "没错!" : $"答对了 {correct} 题（共 {spawnedSlots.Count} 题）";
-    }
-
-    IEnumerator NextAfterDelay()
-    {
-        yield return new WaitForSeconds(ProgressManager.Instance.nextExerciseDelay);
-
-        currentIndex++;
-        if (currentIndex < currentData.questions.Count)
-            ShowQuestion();
+            ProgressManager.Instance?.ShowNextButton();
         else
-            ProgressManager.Instance.ShowNextButton();
+            ResetExercise();
+
+        ProjectUtilities.SetText(
+            feedbackText,
+            allCorrect ? "没错!" : $"答对了 {correct} 题（共 {spawnedSlots.Count} 题）");
     }
 
     public void ResetExercise()
     {
-        feedbackText.text = "";
-        foreach (var chip in spawnedChips)
-            if (chip != null) chip.ReturnToBank();
-        foreach (var slot in spawnedSlots)
-            slot.ClearSlot();
+        ProjectUtilities.SetText(feedbackText, string.Empty);
+
+        foreach (DraggableWord chip in spawnedChips)
+        {
+            if (chip != null)
+                chip.ReturnToBank();
+        }
+
+        foreach (BlankSlot slot in spawnedSlots)
+        {
+            if (slot != null)
+                slot.ClearSlot();
+        }
     }
 
-    void ClearAll()
+    private void ClearAll()
     {
-        foreach (var chip in spawnedChips)
-            if (chip != null) Destroy(chip.gameObject);
-        spawnedChips.Clear();
-
-        foreach (var slot in spawnedSlots)
-            if (slot != null) Destroy(slot.gameObject);
+        ProjectUtilities.DestroyComponents(spawnedChips);
         spawnedSlots.Clear();
-
-        foreach (Transform child in sentenceContainer)
-            Destroy(child.gameObject);
+        ProjectUtilities.DestroyChildren(sentenceContainer);
     }
 
     public void OnExerciseLeave()
     {
         ClearAll();
-        feedbackText.text = "";
+        ProjectUtilities.SetText(feedbackText, string.Empty);
     }
 }

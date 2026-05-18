@@ -1,4 +1,3 @@
-using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
@@ -17,35 +16,32 @@ public class TranslationQuizManager : MonoBehaviour, IExerciseController
     [SerializeField] private GameObject imageContainer;
 
     [Header("Audio (опционально)")]
-    [SerializeField] private Button audioButton; // кнопка воспроизведения
+    [SerializeField] private Button audioButton;
 
+    private readonly List<OptionButtonUI> spawnedOptions = new List<OptionButtonUI>();
     private AudioSource audioSource;
-    private float delayBeforeNext = 1.5f;
-    private List<OptionButtonUI> spawned = new();
-    private int index = 0;
-    private bool answered = false;
     private TranslateData currentData;
+    private int index;
+    private bool answered;
 
-    void Awake()
+    private void Awake()
     {
-        // AudioSource на том же GameObject
         audioSource = GetComponent<AudioSource>();
         if (audioSource == null)
-        {
             audioSource = gameObject.AddComponent<AudioSource>();
-        }
 
-        if (audioButton != null)
-            audioButton.onClick.AddListener(PlayAudio);
+        audioButton?.onClick.AddListener(PlayAudio);
     }
 
-    void Start()
+    private void Start()
     {
         if (currentData != null)
             LoadExercise(currentData);
+    }
 
-        if (ProgressManager.Instance != null)
-            delayBeforeNext = ProgressManager.Instance.nextExerciseDelay;
+    private void OnDestroy()
+    {
+        audioButton?.onClick.RemoveListener(PlayAudio);
     }
 
     public void LoadExercise(TranslateData data)
@@ -58,61 +54,107 @@ public class TranslationQuizManager : MonoBehaviour, IExerciseController
 
     private void ShowQuestion()
     {
-        if (optionButtonPrefab == null) { Debug.LogError("optionButtonPrefab не назначен!"); return; }
-        if (optionsParent == null)      { Debug.LogError("optionsParent не назначен!");      return; }
+        if (!HasRequiredReferences())
+            return;
 
+        ClearOptions();
         answered = false;
 
-        if (currentData == null || index >= currentData.questions.Count)
+        if (currentData == null || currentData.questions == null || index >= currentData.questions.Count)
         {
             Finish();
             return;
         }
 
-        var q = currentData.questions[index];
-        wordText.text = q.foreignWord;
-
-        if (progressText)
-            progressText.text = $"{index + 1}/{currentData.questions.Count}";
-
-        // Картинка
-        if (questionImage != null)
+        TranslateData.Question question = currentData.questions[index];
+        if (question == null)
         {
-            bool hasImage = q.image != null;
-            questionImage.sprite = hasImage ? q.image : null;
-            questionImage.preserveAspect = true;
-
-            if (imageContainer != null)
-                imageContainer.SetActive(hasImage);
-            else
-                questionImage.gameObject.SetActive(hasImage);
+            Finish();
+            return;
         }
 
-        // Аудио — показать кнопку если есть клип, скрыть если нет
-        if (audioButton != null)
-        {
-            bool hasAudio = q.audio != null;
-            audioButton.gameObject.SetActive(hasAudio);
+        ProjectUtilities.SetText(wordText, question.foreignWord);
+        ProjectUtilities.SetText(progressText, $"{index + 1}/{currentData.questions.Count}");
 
-            // Автоматически воспроизвести при показе вопроса
-            if (hasAudio) PlayAudio();
+        SetupQuestionImage(question);
+        SetupAudioButton(question);
+        SpawnOptions(question);
+    }
+
+    private bool HasRequiredReferences()
+    {
+        if (optionButtonPrefab == null)
+        {
+            Debug.LogError("TranslationQuizManager: optionButtonPrefab не назначен.");
+            return false;
         }
 
-        foreach (var opt in q.options)
+        if (optionsParent == null)
         {
-            var btn = Instantiate(optionButtonPrefab);
-            var btnUI = btn.GetComponent<OptionButtonUI>();
-            btn.transform.SetParent(optionsParent, false);
-            btnUI.Setup(opt, OnOptionClicked);
-            spawned.Add(btnUI);
+            Debug.LogError("TranslationQuizManager: optionsParent не назначен.");
+            return false;
+        }
+
+        return true;
+    }
+
+    private void SetupQuestionImage(TranslateData.Question question)
+    {
+        if (questionImage == null)
+            return;
+
+        bool hasImage = question.image != null;
+        questionImage.sprite = hasImage ? question.image : null;
+        questionImage.preserveAspect = true;
+
+        if (imageContainer != null)
+            imageContainer.SetActive(hasImage);
+        else
+            questionImage.gameObject.SetActive(hasImage);
+    }
+
+    private void SetupAudioButton(TranslateData.Question question)
+    {
+        if (audioButton == null)
+            return;
+
+        bool hasAudio = question.audio != null;
+        audioButton.gameObject.SetActive(hasAudio);
+
+        if (hasAudio)
+            PlayAudio();
+    }
+
+    private void SpawnOptions(TranslateData.Question question)
+    {
+        if (question.options == null)
+            return;
+
+        foreach (string option in question.options)
+        {
+            GameObject buttonObject = Instantiate(optionButtonPrefab, optionsParent);
+            OptionButtonUI optionButton = buttonObject.GetComponent<OptionButtonUI>();
+
+            if (optionButton == null)
+                continue;
+
+            optionButton.Setup(option, OnOptionClicked);
+            spawnedOptions.Add(optionButton);
         }
     }
 
     public void PlayAudio()
     {
-        if (currentData == null || index >= currentData.questions.Count) return;
-        var clip = currentData.questions[index].audio;
-        if (clip == null || audioSource == null) return;
+        if (currentData == null || currentData.questions == null || index >= currentData.questions.Count)
+            return;
+
+        TranslateData.Question question = currentData.questions[index];
+        if (question == null)
+            return;
+
+        AudioClip clip = question.audio;
+        if (clip == null || audioSource == null)
+            return;
 
         audioSource.Stop();
         audioSource.clip = clip;
@@ -121,48 +163,59 @@ public class TranslationQuizManager : MonoBehaviour, IExerciseController
 
     private void OnOptionClicked(OptionButtonUI clicked)
     {
-        if (answered) return;
+        if (answered || clicked == null || currentData == null || currentData.questions == null)
+            return;
+
         answered = true;
 
-        var q = currentData.questions[index];
-        bool isCorrect = clicked.Value.Trim().ToLower() == q.correctTranslation.Trim().ToLower();
+        if (index >= currentData.questions.Count)
+            return;
 
-        if (isCorrect) clicked.SetCorrect();
-        else           clicked.SetWrong();
+        TranslateData.Question question = currentData.questions[index];
+        if (question == null)
+            return;
 
-        foreach (var btn in spawned)
-        {
-            btn.SetInteractable(false);
-            if (btn.Value.Trim().ToLower() == q.correctTranslation.Trim().ToLower())
-                btn.SetCorrect();
-        }
+        bool isCorrect = ProjectUtilities.SameAnswer(clicked.Value, question.correctTranslation);
 
+        if (isCorrect)
+            clicked.SetCorrect();
+        else
+            clicked.SetWrong();
+
+        MarkCorrectOption(question);
         Finish();
-        // StartCoroutine(NextAfterDelay());
     }
 
-    private IEnumerator NextAfterDelay()
+    private void MarkCorrectOption(TranslateData.Question question)
     {
-        yield return new WaitForSeconds(delayBeforeNext);
-        ClearOptions();
-        index++;
-        ShowQuestion();
+        foreach (OptionButtonUI optionButton in spawnedOptions)
+        {
+            if (optionButton == null)
+                continue;
+
+            optionButton.SetInteractable(false);
+
+            if (ProjectUtilities.SameAnswer(optionButton.Value, question.correctTranslation))
+                optionButton.SetCorrect();
+        }
     }
-    
+
     private void Finish()
     {
-        if (progressText && currentData != null)
+        if (progressText != null && currentData != null && currentData.questions != null)
             progressText.text = $"{currentData.questions.Count}/{currentData.questions.Count}";
-        
-        ProgressManager.Instance.ShowNextButton();
+
+        ProgressManager.Instance?.ShowNextButton();
     }
 
     private void ClearOptions()
     {
-        foreach (var btn in spawned)
-            if (btn != null) Destroy(btn.gameObject);
-        spawned.Clear();
+        ProjectUtilities.DestroyComponents(spawnedOptions);
     }
 
-    public void OnExerciseLeave() => ClearOptions();
+    public void OnExerciseLeave()
+    {
+        ClearOptions();
+        answered = false;
+    }
 }

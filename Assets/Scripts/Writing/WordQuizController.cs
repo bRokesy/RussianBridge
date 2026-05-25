@@ -16,6 +16,7 @@ public class WordQuizController : MonoBehaviour, IExerciseController
     private WritingData currentData;
     private int currentClipIndex;
     private int currentIndex;
+    private bool isAdvancingQuestion;
 
     private void Awake()
     {
@@ -35,8 +36,10 @@ public class WordQuizController : MonoBehaviour, IExerciseController
 
     public void LoadExercise(WritingData data)
     {
+        StopAllCoroutines();
         currentData = data;
         currentIndex = 0;
+        isAdvancingQuestion = false;
         ShowQuestion();
     }
 
@@ -70,6 +73,9 @@ public class WordQuizController : MonoBehaviour, IExerciseController
 
     private void CheckAnswer(string userInput)
     {
+        if (isAdvancingQuestion)
+            return;
+
         if (string.IsNullOrWhiteSpace(userInput))
         {
             view.ResetView();
@@ -81,14 +87,13 @@ public class WordQuizController : MonoBehaviour, IExerciseController
         if (isCorrect)
         {
             view.SetCorrect();
+            isAdvancingQuestion = true;
             StartCoroutine(NextAfterDelay());
         }
         else
         {
             view.SetWrong();
         }
-
-        ProgressManager.Instance?.ShowNextButton();
     }
 
     private bool IsCorrectAnswer(string userInput)
@@ -112,6 +117,7 @@ public class WordQuizController : MonoBehaviour, IExerciseController
         yield return new WaitForSeconds(delay);
 
         currentIndex++;
+        isAdvancingQuestion = false;
 
         if (currentData != null && currentData.questions != null && currentIndex < currentData.questions.Count)
             ShowQuestion();
@@ -121,6 +127,8 @@ public class WordQuizController : MonoBehaviour, IExerciseController
 
     public void OnExerciseLeave()
     {
+        StopAllCoroutines();
+        isAdvancingQuestion = false;
         view?.ResetView();
     }
 }

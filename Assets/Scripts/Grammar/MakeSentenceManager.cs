@@ -21,6 +21,7 @@ public class MakeSentenceManager : MonoBehaviour, IExerciseController
     private readonly List<DraggableWord> spawnedChips = new List<DraggableWord>();
     private MakeSentenceData currentData;
     private int currentIndex;
+    private bool isAdvancingQuestion;
 
     private void Start()
     {
@@ -30,8 +31,10 @@ public class MakeSentenceManager : MonoBehaviour, IExerciseController
 
     public void LoadExercise(MakeSentenceData data)
     {
+        StopAllCoroutines();
         currentData = data;
         currentIndex = 0;
+        isAdvancingQuestion = false;
         ShowQuestion();
     }
 
@@ -75,6 +78,9 @@ public class MakeSentenceManager : MonoBehaviour, IExerciseController
 
     public void CheckAnswer()
     {
+        if (isAdvancingQuestion)
+            return;
+
         if (currentData == null || currentData.questions == null || currentIndex >= currentData.questions.Count)
             return;
 
@@ -84,7 +90,10 @@ public class MakeSentenceManager : MonoBehaviour, IExerciseController
         ProjectUtilities.SetText(feedbackText, correct ? "没错!" : "再试一遍");
 
         if (correct)
+        {
+            isAdvancingQuestion = true;
             StartCoroutine(NextAfterDelay());
+        }
     }
 
     private List<string> GetPlayerWords()
@@ -124,6 +133,7 @@ public class MakeSentenceManager : MonoBehaviour, IExerciseController
         yield return new WaitForSeconds(delay);
 
         currentIndex++;
+        isAdvancingQuestion = false;
 
         if (currentData != null && currentData.questions != null && currentIndex < currentData.questions.Count)
             ShowQuestion();
@@ -144,6 +154,8 @@ public class MakeSentenceManager : MonoBehaviour, IExerciseController
 
     public void OnExerciseLeave()
     {
+        StopAllCoroutines();
+        isAdvancingQuestion = false;
         ClearAll();
         ProjectUtilities.SetText(feedbackText, string.Empty);
     }

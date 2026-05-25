@@ -29,6 +29,7 @@ public class ProgressManager : MonoBehaviour
     private int currentExercise;
     private int lastSyncedLesson = -1;
     private int lastSyncedExercise = -1;
+    private bool isChangingExercise;
     private FirebaseFirestore database;
     private SceneUIPanels scenePanels;
 
@@ -70,16 +71,27 @@ public class ProgressManager : MonoBehaviour
 
     public void NextExercise()
     {
-        StartCoroutine(NextExerciseDelayed(nextExerciseDelay));
+        StartNextExercise(nextExerciseDelay);
     }
 
     public void NextExerciseNoDelay()
     {
-        StartCoroutine(NextExerciseDelayed(0f));
+        StartNextExercise(0f);
+    }
+
+    private void StartNextExercise(float delay)
+    {
+        if (isChangingExercise)
+            return;
+
+        StartCoroutine(NextExerciseDelayed(delay));
     }
 
     public void ShowNextButton()
     {
+        if (isChangingExercise)
+            return;
+
         ResolveNextButton();
 
         if (nextButton == null)
@@ -94,11 +106,22 @@ public class ProgressManager : MonoBehaviour
 
     private IEnumerator NextExerciseDelayed(float delay)
     {
-        if (!TryGetCurrentLesson(out LessonData lesson))
+        if (isChangingExercise)
             yield break;
 
+        isChangingExercise = true;
+
+        if (!TryGetCurrentLesson(out LessonData lesson))
+        {
+            isChangingExercise = false;
+            yield break;
+        }
+
         if (nextButton != null)
+        {
+            nextButton.interactable = false;
             nextButton.gameObject.SetActive(false);
+        }
 
         yield return new WaitForSeconds(delay);
 
@@ -115,16 +138,21 @@ public class ProgressManager : MonoBehaviour
         else
         {
             yield return StartCoroutine(SendLessonCompleteToFirebase(currentLesson));
+            isChangingExercise = false;
             OnAllComplete();
             yield break;
         }
 
         SaveProgress();
+        isChangingExercise = false;
         LoadCurrent();
     }
 
     public void PrevExercise()
     {
+        if (isChangingExercise)
+            return;
+
         if (currentExercise > 0)
         {
             currentExercise--;
@@ -141,6 +169,7 @@ public class ProgressManager : MonoBehaviour
 
     public void ResetProgress()
     {
+        isChangingExercise = false;
         currentLesson = 0;
         currentExercise = 0;
         lastSyncedLesson = -1;
@@ -501,6 +530,7 @@ public class ProgressManager : MonoBehaviour
 
     private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
+        isChangingExercise = false;
         scenePanels = null;
         ResolveNavigationReferences();
         BindButtons();

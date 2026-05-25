@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
@@ -23,6 +24,7 @@ public class TranslationQuizManager : MonoBehaviour, IExerciseController
     private TranslateData currentData;
     private int index;
     private bool answered;
+    private bool isAdvancingQuestion;
 
     private void Awake()
     {
@@ -46,19 +48,23 @@ public class TranslationQuizManager : MonoBehaviour, IExerciseController
 
     public void LoadExercise(TranslateData data)
     {
+        StopAllCoroutines();
         currentData = data;
         index = 0;
         answered = false;
+        isAdvancingQuestion = false;
         ShowQuestion();
     }
 
     private void ShowQuestion()
     {
+        answered = false;
+        isAdvancingQuestion = false;
+
         if (!HasRequiredReferences())
             return;
 
         ClearOptions();
-        answered = false;
 
         if (currentData == null || currentData.questions == null || index >= currentData.questions.Count)
         {
@@ -163,10 +169,8 @@ public class TranslationQuizManager : MonoBehaviour, IExerciseController
 
     private void OnOptionClicked(OptionButtonUI clicked)
     {
-        if (answered || clicked == null || currentData == null || currentData.questions == null)
+        if (answered || isAdvancingQuestion || clicked == null || currentData == null || currentData.questions == null)
             return;
-
-        answered = true;
 
         if (index >= currentData.questions.Count)
             return;
@@ -174,6 +178,9 @@ public class TranslationQuizManager : MonoBehaviour, IExerciseController
         TranslateData.Question question = currentData.questions[index];
         if (question == null)
             return;
+
+        answered = true;
+        isAdvancingQuestion = true;
 
         bool isCorrect = ProjectUtilities.SameAnswer(clicked.Value, question.correctTranslation);
 
@@ -183,7 +190,20 @@ public class TranslationQuizManager : MonoBehaviour, IExerciseController
             clicked.SetWrong();
 
         MarkCorrectOption(question);
-        Finish();
+        StartCoroutine(NextAfterDelay());
+    }
+
+    private IEnumerator NextAfterDelay()
+    {
+        float delay = ProgressManager.Instance != null ? ProgressManager.Instance.nextExerciseDelay : 0f;
+        yield return new WaitForSeconds(delay);
+
+        index++;
+
+        if (currentData != null && currentData.questions != null && index < currentData.questions.Count)
+            ShowQuestion();
+        else
+            Finish();
     }
 
     private void MarkCorrectOption(TranslateData.Question question)
@@ -202,6 +222,8 @@ public class TranslationQuizManager : MonoBehaviour, IExerciseController
 
     private void Finish()
     {
+        isAdvancingQuestion = false;
+
         if (progressText != null && currentData != null && currentData.questions != null)
             progressText.text = $"{currentData.questions.Count}/{currentData.questions.Count}";
 
@@ -215,7 +237,9 @@ public class TranslationQuizManager : MonoBehaviour, IExerciseController
 
     public void OnExerciseLeave()
     {
+        StopAllCoroutines();
         ClearOptions();
         answered = false;
+        isAdvancingQuestion = false;
     }
 }

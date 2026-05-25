@@ -934,8 +934,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: 540}
-  m_SizeDelta: {x: 200, y: 50}
+  m_AnchoredPosition: {x: 24, y: 186}
+  m_SizeDelta: {x: 820, y: 130}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &367852993
 MonoBehaviour:
@@ -993,8 +993,8 @@ MonoBehaviour:
   m_fontSizeMin: 18
   m_fontSizeMax: 72
   m_fontStyle: 0
-  m_HorizontalAlignment: 1
-  m_VerticalAlignment: 256
+  m_HorizontalAlignment: 2
+  m_VerticalAlignment: 512
   m_textAlignment: 65535
   m_characterSpacing: 0
   m_characterHorizontalScale: 1
@@ -1188,9 +1188,7 @@ GameObject:
   - component: {fileID: 383625821}
   - component: {fileID: 383625820}
   - component: {fileID: 383625819}
-  - component: {fileID: 383625818}
   - component: {fileID: 383625817}
-  - component: {fileID: 383625816}
   - component: {fileID: 383625822}
   m_Layer: 0
   m_Name: LessonButton 7
@@ -1221,18 +1219,6 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
---- !u!114 &383625816
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 383625814}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: df39ba5944b344bd7bb890030130ee6e, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::LessonButton
 --- !u!114 &383625817
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1247,19 +1233,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Outline
   m_EffectColor: {r: 0.5754717, g: 0.5754717, b: 0.5754717, a: 0.5}
   m_EffectDistance: {x: 1, y: -1}
-  m_UseGraphicAlpha: 1
---- !u!114 &383625818
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 383625814}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: adb30198aa32dd140b5750692dd48104, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Nobi.UiRoundedCorners::Nobi.UiRoundedCorners.ImageWithRoundedCorners
+  m_UseGraphicAlpha: 0
 --- !u!114 &383625819
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2320,7 +2294,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Button
+  m_text: X
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -2329,8 +2303,8 @@ MonoBehaviour:
   m_fontMaterials: []
   m_fontColor32:
     serializedVersion: 2
-    rgba: 4281479730
-  m_fontColor: {r: 0.19607843, g: 0.19607843, b: 0.19607843, a: 1}
+    rgba: 4278190080
+  m_fontColor: {r: 0, g: 0, b: 0, a: 1}
   m_enableVertexGradient: 0
   m_colorMode: 3
   m_fontColorGradient:
@@ -2347,13 +2321,13 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 24
-  m_fontSizeBase: 24
+  m_fontSize: 50
+  m_fontSizeBase: 50
   m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
   m_fontSizeMax: 72
-  m_fontStyle: 0
+  m_fontStyle: 1
   m_HorizontalAlignment: 2
   m_VerticalAlignment: 512
   m_textAlignment: 65535
@@ -3262,9 +3236,7 @@ GameObject:
   - component: {fileID: 900160303}
   - component: {fileID: 900160302}
   - component: {fileID: 900160301}
-  - component: {fileID: 900160300}
   - component: {fileID: 900160299}
-  - component: {fileID: 900160298}
   - component: {fileID: 900160304}
   m_Layer: 0
   m_Name: LessonButton 8
@@ -3295,18 +3267,6 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
---- !u!114 &900160298
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 900160296}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: df39ba5944b344bd7bb890030130ee6e, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::LessonButton
 --- !u!114 &900160299
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3322,18 +3282,6 @@ MonoBehaviour:
   m_EffectColor: {r: 0.5754717, g: 0.5754717, b: 0.5754717, a: 0.5}
   m_EffectDistance: {x: 1, y: -1}
   m_UseGraphicAlpha: 1
---- !u!114 &900160300
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 900160296}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: adb30198aa32dd140b5750692dd48104, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Nobi.UiRoundedCorners::Nobi.UiRoundedCorners.ImageWithRoundedCorners
 --- !u!114 &900160301
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4262,9 +4210,7 @@ GameObject:
   - component: {fileID: 1096952590}
   - component: {fileID: 1096952589}
   - component: {fileID: 1096952588}
-  - component: {fileID: 1096952587}
   - component: {fileID: 1096952586}
-  - component: {fileID: 1096952585}
   - component: {fileID: 1096952591}
   m_Layer: 0
   m_Name: LessonButton 5
@@ -4295,18 +4241,6 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
---- !u!114 &1096952585
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1096952583}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: df39ba5944b344bd7bb890030130ee6e, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::LessonButton
 --- !u!114 &1096952586
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4322,18 +4256,6 @@ MonoBehaviour:
   m_EffectColor: {r: 0.5754717, g: 0.5754717, b: 0.5754717, a: 0.5}
   m_EffectDistance: {x: 1, y: -1}
   m_UseGraphicAlpha: 1
---- !u!114 &1096952587
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1096952583}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: adb30198aa32dd140b5750692dd48104, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Nobi.UiRoundedCorners::Nobi.UiRoundedCorners.ImageWithRoundedCorners
 --- !u!114 &1096952588
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4454,9 +4376,7 @@ GameObject:
   - component: {fileID: 1143110664}
   - component: {fileID: 1143110663}
   - component: {fileID: 1143110662}
-  - component: {fileID: 1143110661}
   - component: {fileID: 1143110660}
-  - component: {fileID: 1143110659}
   - component: {fileID: 1143110665}
   m_Layer: 0
   m_Name: LessonButton 6
@@ -4487,18 +4407,6 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
---- !u!114 &1143110659
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1143110657}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: df39ba5944b344bd7bb890030130ee6e, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::LessonButton
 --- !u!114 &1143110660
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4514,18 +4422,6 @@ MonoBehaviour:
   m_EffectColor: {r: 0.5754717, g: 0.5754717, b: 0.5754717, a: 0.5}
   m_EffectDistance: {x: 1, y: -1}
   m_UseGraphicAlpha: 1
---- !u!114 &1143110661
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1143110657}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: adb30198aa32dd140b5750692dd48104, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Nobi.UiRoundedCorners::Nobi.UiRoundedCorners.ImageWithRoundedCorners
 --- !u!114 &1143110662
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4668,8 +4564,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: 318}
-  m_SizeDelta: {x: 200, y: 50}
+  m_AnchoredPosition: {x: 24, y: 31}
+  m_SizeDelta: {x: 820, y: 130}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1191374851
 MonoBehaviour:
@@ -4725,8 +4621,8 @@ MonoBehaviour:
   m_fontSizeMin: 18
   m_fontSizeMax: 72
   m_fontStyle: 0
-  m_HorizontalAlignment: 1
-  m_VerticalAlignment: 256
+  m_HorizontalAlignment: 2
+  m_VerticalAlignment: 512
   m_textAlignment: 65535
   m_characterSpacing: 0
   m_characterHorizontalScale: 1
@@ -5108,8 +5004,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: -125}
-  m_SizeDelta: {x: 300, y: 300}
+  m_AnchoredPosition: {x: -153, y: 724}
+  m_SizeDelta: {x: 600, y: 600}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1244860921
 MonoBehaviour:
@@ -5258,8 +5154,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: 158}
-  m_SizeDelta: {x: 200, y: 50}
+  m_AnchoredPosition: {x: 24, y: -280}
+  m_SizeDelta: {x: 820, y: 130}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1290925643
 MonoBehaviour:
@@ -5317,8 +5213,8 @@ MonoBehaviour:
   m_fontSizeMin: 18
   m_fontSizeMax: 72
   m_fontStyle: 0
-  m_HorizontalAlignment: 1
-  m_VerticalAlignment: 256
+  m_HorizontalAlignment: 2
+  m_VerticalAlignment: 512
   m_textAlignment: 65535
   m_characterSpacing: 0
   m_characterHorizontalScale: 1
@@ -5435,9 +5331,7 @@ GameObject:
   - component: {fileID: 1332242387}
   - component: {fileID: 1332242386}
   - component: {fileID: 1332242385}
-  - component: {fileID: 1332242384}
   - component: {fileID: 1332242383}
-  - component: {fileID: 1332242382}
   - component: {fileID: 1332242388}
   m_Layer: 0
   m_Name: LessonButton 9
@@ -5468,18 +5362,6 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
---- !u!114 &1332242382
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1332242380}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: df39ba5944b344bd7bb890030130ee6e, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::LessonButton
 --- !u!114 &1332242383
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -5495,18 +5377,6 @@ MonoBehaviour:
   m_EffectColor: {r: 0.5754717, g: 0.5754717, b: 0.5754717, a: 0.5}
   m_EffectDistance: {x: 1, y: -1}
   m_UseGraphicAlpha: 1
---- !u!114 &1332242384
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1332242380}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: adb30198aa32dd140b5750692dd48104, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Nobi.UiRoundedCorners::Nobi.UiRoundedCorners.ImageWithRoundedCorners
 --- !u!114 &1332242385
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -6027,8 +5897,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: 641}
-  m_SizeDelta: {x: 200, y: 50}
+  m_AnchoredPosition: {x: 24, y: 335.5}
+  m_SizeDelta: {x: 820, y: 130}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1449923319
 MonoBehaviour:
@@ -6084,8 +5954,8 @@ MonoBehaviour:
   m_fontSizeMin: 18
   m_fontSizeMax: 72
   m_fontStyle: 0
-  m_HorizontalAlignment: 1
-  m_VerticalAlignment: 256
+  m_HorizontalAlignment: 2
+  m_VerticalAlignment: 512
   m_textAlignment: 65535
   m_characterSpacing: 0
   m_characterHorizontalScale: 1
@@ -7270,8 +7140,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: 243}
-  m_SizeDelta: {x: 200, y: 50}
+  m_AnchoredPosition: {x: 24, y: -122}
+  m_SizeDelta: {x: 820, y: 130}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1744238076
 MonoBehaviour:
@@ -7327,8 +7197,8 @@ MonoBehaviour:
   m_fontSizeMin: 18
   m_fontSizeMax: 72
   m_fontStyle: 0
-  m_HorizontalAlignment: 1
-  m_VerticalAlignment: 256
+  m_HorizontalAlignment: 2
+  m_VerticalAlignment: 512
   m_textAlignment: 65535
   m_characterSpacing: 0
   m_characterHorizontalScale: 1
@@ -7710,7 +7580,6 @@ GameObject:
   - component: {fileID: 1929708923}
   - component: {fileID: 1929708922}
   - component: {fileID: 1929708921}
-  - component: {fileID: 1929708920}
   - component: {fileID: 1929708919}
   - component: {fileID: 1929708924}
   m_Layer: 0
@@ -7757,18 +7626,6 @@ MonoBehaviour:
   m_EffectColor: {r: 0.5754717, g: 0.5754717, b: 0.5754717, a: 0.5}
   m_EffectDistance: {x: 1, y: -1}
   m_UseGraphicAlpha: 1
---- !u!114 &1929708920
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1929708916}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: adb30198aa32dd140b5750692dd48104, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Nobi.UiRoundedCorners::Nobi.UiRoundedCorners.ImageWithRoundedCorners
 --- !u!114 &1929708921
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -8550,9 +8407,7 @@ GameObject:
   - component: {fileID: 2089992985}
   - component: {fileID: 2089992984}
   - component: {fileID: 2089992983}
-  - component: {fileID: 2089992982}
   - component: {fileID: 2089992981}
-  - component: {fileID: 2089992980}
   - component: {fileID: 2089992986}
   m_Layer: 0
   m_Name: LessonButton 10
@@ -8583,18 +8438,6 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
---- !u!114 &2089992980
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2089992978}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: df39ba5944b344bd7bb890030130ee6e, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::LessonButton
 --- !u!114 &2089992981
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -8610,18 +8453,6 @@ MonoBehaviour:
   m_EffectColor: {r: 0.5754717, g: 0.5754717, b: 0.5754717, a: 0.5}
   m_EffectDistance: {x: 1, y: -1}
   m_UseGraphicAlpha: 1
---- !u!114 &2089992982
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2089992978}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: adb30198aa32dd140b5750692dd48104, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Nobi.UiRoundedCorners::Nobi.UiRoundedCorners.ImageWithRoundedCorners
 --- !u!114 &2089992983
 MonoBehaviour:
   m_ObjectHideFlags: 0

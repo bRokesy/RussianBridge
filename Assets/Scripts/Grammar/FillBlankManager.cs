@@ -28,6 +28,7 @@ public class FillBlankManager : MonoBehaviour, IExerciseController
     private readonly List<BlankSlot> spawnedSlots = new List<BlankSlot>();
     private FillBlankData currentData;
     private int currentIndex;
+    private bool isAdvancingQuestion;
 
     private void Start()
     {
@@ -37,8 +38,10 @@ public class FillBlankManager : MonoBehaviour, IExerciseController
 
     public void LoadExercise(FillBlankData data)
     {
+        StopAllCoroutines();
         currentData = data;
         currentIndex = 0;
+        isAdvancingQuestion = false;
         ShowQuestion();
     }
 
@@ -138,6 +141,9 @@ public class FillBlankManager : MonoBehaviour, IExerciseController
 
     public void CheckAnswer()
     {
+        if (isAdvancingQuestion)
+            return;
+
         int correct = 0;
 
         foreach (BlankSlot slot in spawnedSlots)
@@ -149,13 +155,29 @@ public class FillBlankManager : MonoBehaviour, IExerciseController
         bool allCorrect = correct == spawnedSlots.Count;
 
         if (allCorrect)
-            ProgressManager.Instance?.ShowNextButton();
+            StartCoroutine(NextAfterDelay());
         else
             ResetExercise();
 
         ProjectUtilities.SetText(
             feedbackText,
             allCorrect ? "没错!" : $"答对了 {correct} 题（共 {spawnedSlots.Count} 题）");
+    }
+
+    private IEnumerator NextAfterDelay()
+    {
+        isAdvancingQuestion = true;
+
+        float delay = ProgressManager.Instance != null ? ProgressManager.Instance.nextExerciseDelay : 0f;
+        yield return new WaitForSeconds(delay);
+
+        currentIndex++;
+        isAdvancingQuestion = false;
+
+        if (currentData != null && currentData.questions != null && currentIndex < currentData.questions.Count)
+            ShowQuestion();
+        else
+            ProgressManager.Instance?.ShowNextButton();
     }
 
     public void ResetExercise()
@@ -184,6 +206,8 @@ public class FillBlankManager : MonoBehaviour, IExerciseController
 
     public void OnExerciseLeave()
     {
+        StopAllCoroutines();
+        isAdvancingQuestion = false;
         ClearAll();
         ProjectUtilities.SetText(feedbackText, string.Empty);
     }

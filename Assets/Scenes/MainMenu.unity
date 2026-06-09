@@ -5310,10 +5310,10 @@ MonoBehaviour:
   - {fileID: 11400000, guid: b401edf6d901c3a40bfecf31a3d67415, type: 2}
   - {fileID: 11400000, guid: 6eaa4f4bf8a986141a70c00a45f3c307, type: 2}
   - {fileID: 11400000, guid: 0a3bedff7db284a41b2304be13eea090, type: 2}
-  - {fileID: 11400000, guid: 4f30c18911d23544c971fe436d37c27f, type: 2}
-  - {fileID: 11400000, guid: 80eca024a2f0c1d49ba967c15464fcae, type: 2}
-  - {fileID: 11400000, guid: 15463a0f0c52c414a873104ad655cccc, type: 2}
-  - {fileID: 11400000, guid: 8739d272b97277e43a637fe8dde3c174, type: 2}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
   nextExerciseDelay: 1.5
   progressLabel: {fileID: 0}
   nextButton: {fileID: 0}

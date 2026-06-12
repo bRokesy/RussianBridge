@@ -132,3 +132,27 @@ sysinfo.txt
 *.apk
 *.aab
 *.unitypackage
+
+# Временные файлы Codex
+.codex_build/
+
+# Зависимости Node.js
+node_modules/
+**/node_modules/
+
+# Unity
+[Ll]ibrary/
+[Tt]emp/
+[Oo]bj/
+[Ll]ogs/
+[Uu]ser[Ss]ettings/
+[Bb]uild/
+[Bb]uilds/
+
+# IDE
+.vs/
+.idea/
+.vscode/
+*.csproj
+*.sln
+*.user

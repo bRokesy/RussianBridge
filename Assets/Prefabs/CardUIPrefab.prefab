@@ -145,8 +145,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: "\u661F\u671F\u5929\u662F\u6211\u59B9\u59B9\u7684\u751F\u65E5\uFF0C\u6211\u4EEC\u4F1A\u4E70\u4E00\u4E2A\u5927\u86CB\u7CD5\uFF0C\u5E76\u5531\u300A\u751F\u65E5\u5FEB\u4E50\u300B\u6B4C\u3002"
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 2e8f559ed6e048b4fa6f7a6b82691b87, type: 2}
-  m_sharedMaterial: {fileID: 4482600098274225961, guid: 2e8f559ed6e048b4fa6f7a6b82691b87, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 8a95911189b99074f813a1d98b24ac4f, type: 2}
+  m_sharedMaterial: {fileID: 4482600098274225961, guid: 8a95911189b99074f813a1d98b24ac4f, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -174,7 +174,7 @@ MonoBehaviour:
   m_fontSizeBase: 60
   m_fontWeight: 400
   m_enableAutoSizing: 1
-  m_fontSizeMin: 18
+  m_fontSizeMin: 22
   m_fontSizeMax: 72
   m_fontStyle: 1
   m_HorizontalAlignment: 2
@@ -282,7 +282,7 @@ MonoBehaviour:
       m_Calls: []
   m_text: "\u86CB\u7CD5"
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 2e8f559ed6e048b4fa6f7a6b82691b87, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 8a95911189b99074f813a1d98b24ac4f, type: 2}
   m_sharedMaterial: {fileID: 4896193773874073063, guid: b13425aa1fc52480da04a2fc1effd940, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
@@ -419,8 +419,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: "\u0442\u043E\u0440\u0442"
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
-  m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 8a95911189b99074f813a1d98b24ac4f, type: 2}
+  m_sharedMaterial: {fileID: 4482600098274225961, guid: 8a95911189b99074f813a1d98b24ac4f, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -561,8 +561,8 @@ MonoBehaviour:
     \u043F\u0435\u0442\u044C \u043F\u0435\u0441\u043D\u044E \xAB\u0421 \u0434\u043D\u0451\u043C
     \u0440\u043E\u0436\u0434\u0435\u043D\u0438\u044F!\xBB"
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
-  m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 8a95911189b99074f813a1d98b24ac4f, type: 2}
+  m_sharedMaterial: {fileID: 4482600098274225961, guid: 8a95911189b99074f813a1d98b24ac4f, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -586,13 +586,13 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 56.9
+  m_fontSize: 44.85
   m_fontSizeBase: 44
   m_fontWeight: 400
   m_enableAutoSizing: 1
   m_fontSizeMin: 18
   m_fontSizeMax: 72
-  m_fontStyle: 0
+  m_fontStyle: 1
   m_HorizontalAlignment: 2
   m_VerticalAlignment: 512
   m_textAlignment: 65535

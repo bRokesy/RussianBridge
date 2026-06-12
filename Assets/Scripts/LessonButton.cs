@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+using System.Collections;
 using System.Text;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -12,6 +12,7 @@ public class LessonButton : MonoBehaviour
     private Button button;
     private Image image;
     private int lessonNumber;
+    private bool isOpening;
 
     private void Awake()
     {
@@ -38,30 +39,42 @@ public class LessonButton : MonoBehaviour
     {
         if (!IsUnlocked())
         {
-            Debug.Log($"LessonButton: урок {lessonNumber} закрыт. Сначала пройдите предыдущий урок.");
+            Debug.Log($"LessonButton: lesson {lessonNumber} is locked. Complete the previous lesson first.");
             return;
         }
 
-        LessonData selectedLesson = ResolveLessonData();
-        if (selectedLesson == null)
-        {
-            Debug.LogError($"LessonButton: lessonData не назначен для {gameObject.name}.");
+        if (isOpening)
             return;
-        }
+
+        StartCoroutine(OpenLesson());
+    }
+
+    private IEnumerator OpenLesson()
+    {
+        isOpening = true;
 
         ProgressManager progressManager = ProgressManager.Instance;
         if (progressManager == null)
+            progressManager = FindFirstObjectByType<ProgressManager>();
+
+        if (progressManager == null)
         {
-            Debug.LogError("LessonButton: ProgressManager не найден в сцене.");
-            return;
+            Debug.LogError("LessonButton: ProgressManager was not found in the scene.");
+            isOpening = false;
+            yield break;
         }
 
-        if (progressManager.lessons == null)
-            progressManager.lessons = new List<LessonData>();
+        yield return progressManager.EnsureLessonsLoaded();
 
-        progressManager.lessons.Clear();
-        progressManager.lessons.Add(selectedLesson);
+        LessonData selectedLesson = ResolveLessonData(progressManager);
+        if (selectedLesson == null)
+        {
+            Debug.LogError($"LessonButton: lesson data is not assigned for {gameObject.name}.");
+            isOpening = false;
+            yield break;
+        }
 
+        progressManager.SetActiveLesson(selectedLesson);
         SceneManager.LoadScene(SceneNames.LessonScene);
     }
 
@@ -74,18 +87,16 @@ public class LessonButton : MonoBehaviour
             image = GetComponent<Image>();
     }
 
-    private LessonData ResolveLessonData()
+    private LessonData ResolveLessonData(ProgressManager progressManager = null)
     {
-        if (lessonData != null)
-            return lessonData;
+        if (progressManager == null)
+            progressManager = ProgressManager.Instance;
 
-        ProgressManager progressManager = ProgressManager.Instance;
-        if (progressManager == null || progressManager.lessons == null)
-            return null;
+        LessonData catalogLesson = progressManager?.GetLessonByNumber(lessonNumber);
+        if (catalogLesson != null)
+            return catalogLesson;
 
-        return lessonNumber > 0 && progressManager.lessons.Count >= lessonNumber
-            ? progressManager.lessons[lessonNumber - 1]
-            : null;
+        return lessonData;
     }
 
     private void RefreshState()
@@ -124,7 +135,7 @@ public class LessonButton : MonoBehaviour
         if (int.TryParse(digits.ToString(), out int parsedNumber))
             return parsedNumber;
 
-        Debug.LogWarning($"LessonButton: не удалось определить номер урока из имени объекта '{objectName}'.");
+        Debug.LogWarning($"LessonButton: failed to detect lesson number from object name '{objectName}'.");
         return 0;
     }
 }

@@ -16,6 +16,9 @@ public class ProgressManager : MonoBehaviour
     [Header("Уроки по порядку")]
     public List<LessonData> lessons;
 
+    [Header("Google Sheets")]
+    [SerializeField] private GoogleSheetsLessonSettings googleSheetsLessonSettings = new GoogleSheetsLessonSettings();
+
     [Header("Timing")]
     public float nextExerciseDelay = 1.5f;
 
@@ -30,6 +33,9 @@ public class ProgressManager : MonoBehaviour
     private int lastSyncedLesson = -1;
     private int lastSyncedExercise = -1;
     private bool isChangingExercise;
+    private bool lessonCatalogLoaded;
+    private bool lessonCatalogLoading;
+    private readonly List<LessonData> lessonCatalog = new List<LessonData>();
     private FirebaseFirestore database;
     private SceneUIPanels scenePanels;
 
@@ -57,6 +63,7 @@ public class ProgressManager : MonoBehaviour
 
     private IEnumerator LoadAfterFrame()
     {
+        yield return EnsureLessonsLoaded();
         yield return null;
         LoadCurrent();
     }
@@ -177,6 +184,98 @@ public class ProgressManager : MonoBehaviour
 
         SaveProgress();
         LoadCurrent();
+    }
+
+    public IEnumerator EnsureLessonsLoaded()
+    {
+        if (lessonCatalogLoaded)
+            yield break;
+
+        if (lessonCatalogLoading)
+        {
+            yield return new WaitUntil(() => !lessonCatalogLoading);
+            yield break;
+        }
+
+        if (!ShouldLoadGoogleSheets())
+        {
+            if (googleSheetsLessonSettings != null &&
+                googleSheetsLessonSettings.enabled &&
+                !googleSheetsLessonSettings.HasSources())
+            {
+                Debug.LogWarning("ProgressManager: Google Sheets lesson source is enabled, but no sheet sources are configured. Using serialized lessons.");
+            }
+
+            UseSerializedLessonsCatalog();
+            yield break;
+        }
+
+        lessonCatalogLoading = true;
+        List<LessonData> loadedLessons = null;
+        string loadError = null;
+
+        yield return GoogleSheetsLessonLoader.Load(
+            googleSheetsLessonSettings,
+            result => loadedLessons = result,
+            error => loadError = error);
+
+        lessonCatalogLoading = false;
+
+        if (loadedLessons != null && loadedLessons.Count > 0)
+        {
+            lessonCatalog.Clear();
+            lessonCatalog.AddRange(loadedLessons);
+            lessons = new List<LessonData>(loadedLessons);
+            lessonCatalogLoaded = true;
+
+            Debug.Log($"ProgressManager: loaded {lessonCatalog.Count} lessons from Google Sheets.");
+            yield break;
+        }
+
+        if (!string.IsNullOrWhiteSpace(loadError))
+            Debug.LogWarning("ProgressManager: Google Sheets lesson loading failed: " + loadError);
+
+        if (googleSheetsLessonSettings == null || googleSheetsLessonSettings.useSerializedLessonsAsFallback)
+        {
+            UseSerializedLessonsCatalog();
+        }
+        else
+        {
+            lessonCatalogLoaded = true;
+            if (lessons == null)
+                lessons = new List<LessonData>();
+            lessons.Clear();
+        }
+    }
+
+    public LessonData GetLessonByNumber(int lessonNumber)
+    {
+        if (lessonNumber <= 0)
+            return null;
+
+        List<LessonData> source = lessonCatalog.Count > 0 ? lessonCatalog : lessons;
+        int index = lessonNumber - 1;
+
+        return source != null && index >= 0 && index < source.Count
+            ? source[index]
+            : null;
+    }
+
+    public void SetActiveLesson(LessonData selectedLesson)
+    {
+        if (lessons == null)
+            lessons = new List<LessonData>();
+
+        lessons.Clear();
+
+        if (selectedLesson != null)
+            lessons.Add(selectedLesson);
+
+        currentLesson = 0;
+        currentExercise = 0;
+        lastSyncedLesson = -1;
+        lastSyncedExercise = -1;
+        isChangingExercise = false;
     }
 
     public void RegisterPanels(SceneUIPanels panels)
@@ -356,6 +455,29 @@ public class ProgressManager : MonoBehaviour
     private void SaveProgress()
     {
         PlayerPrefs.Save();
+    }
+
+    private bool ShouldLoadGoogleSheets()
+    {
+        return googleSheetsLessonSettings != null &&
+               googleSheetsLessonSettings.enabled &&
+               googleSheetsLessonSettings.HasSources();
+    }
+
+    private void UseSerializedLessonsCatalog()
+    {
+        lessonCatalog.Clear();
+
+        if (lessons != null)
+        {
+            foreach (LessonData lesson in lessons)
+            {
+                if (lesson != null)
+                    lessonCatalog.Add(lesson);
+            }
+        }
+
+        lessonCatalogLoaded = true;
     }
 
     private void SyncCurrentLessonToFirebase(LessonData lesson)

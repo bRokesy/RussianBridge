@@ -1340,7 +1340,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fb37f8d14bcaaec4898c657da4cd217f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::LessonButton
-  lessonData: {fileID: 11400000, guid: 4f30c18911d23544c971fe436d37c27f, type: 2}
   doneLessonSprite: {fileID: 21300000, guid: 09b7505717795c4409efe5a06a67a972, type: 3}
 --- !u!1 &422370368
 GameObject:
@@ -3388,7 +3387,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fb37f8d14bcaaec4898c657da4cd217f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::LessonButton
-  lessonData: {fileID: 11400000, guid: 80eca024a2f0c1d49ba967c15464fcae, type: 2}
   doneLessonSprite: {fileID: 21300000, guid: 09b7505717795c4409efe5a06a67a972, type: 3}
 --- !u!21 &934680714
 Material:
@@ -3733,7 +3731,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fb37f8d14bcaaec4898c657da4cd217f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::LessonButton
-  lessonData: {fileID: 11400000, guid: ca3a14ac2492a2845959c7ce6fe9cb47, type: 2}
   doneLessonSprite: {fileID: 21300000, guid: 09b7505717795c4409efe5a06a67a972, type: 3}
 --- !u!21 &1017841343
 Material:
@@ -4362,7 +4359,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fb37f8d14bcaaec4898c657da4cd217f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::LessonButton
-  lessonData: {fileID: 11400000, guid: 6eaa4f4bf8a986141a70c00a45f3c307, type: 2}
   doneLessonSprite: {fileID: 21300000, guid: 09b7505717795c4409efe5a06a67a972, type: 3}
 --- !u!1 &1143110657
 GameObject:
@@ -4528,7 +4524,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fb37f8d14bcaaec4898c657da4cd217f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::LessonButton
-  lessonData: {fileID: 11400000, guid: 0a3bedff7db284a41b2304be13eea090, type: 2}
   doneLessonSprite: {fileID: 21300000, guid: 09b7505717795c4409efe5a06a67a972, type: 3}
 --- !u!1 &1191374849
 GameObject:
@@ -4737,7 +4732,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fb37f8d14bcaaec4898c657da4cd217f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Nobi.UiRoundedCorners::Nobi.UiRoundedCorners.ImageWithRoundedCorners
-  lessonData: {fileID: 11400000, guid: 6687534dc85ee42a38d332e8e91db501, type: 2}
   doneLessonSprite: {fileID: 21300000, guid: 09b7505717795c4409efe5a06a67a972, type: 3}
 --- !u!114 &1208267196
 MonoBehaviour:
@@ -5303,20 +5297,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 790f098d005251549aa94dc309f71a5c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ProgressManager
-  lessons:
-  - {fileID: 11400000, guid: 6687534dc85ee42a38d332e8e91db501, type: 2}
-  - {fileID: 11400000, guid: b4049123de9284845ab8ed01dc39b344, type: 2}
-  - {fileID: 11400000, guid: ca3a14ac2492a2845959c7ce6fe9cb47, type: 2}
-  - {fileID: 11400000, guid: b401edf6d901c3a40bfecf31a3d67415, type: 2}
-  - {fileID: 11400000, guid: 6eaa4f4bf8a986141a70c00a45f3c307, type: 2}
-  - {fileID: 11400000, guid: 0a3bedff7db284a41b2304be13eea090, type: 2}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
   googleSheetsLessonSettings:
     enabled: 1
-    useSerializedLessonsAsFallback: 0
     requestTimeout: 20
     sources:
     - name: RussianBridge Lessons
@@ -5492,7 +5474,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fb37f8d14bcaaec4898c657da4cd217f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::LessonButton
-  lessonData: {fileID: 11400000, guid: 15463a0f0c52c414a873104ad655cccc, type: 2}
   doneLessonSprite: {fileID: 21300000, guid: 09b7505717795c4409efe5a06a67a972, type: 3}
 --- !u!1 &1343198605
 GameObject:
@@ -7741,7 +7722,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fb37f8d14bcaaec4898c657da4cd217f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::LessonButton
-  lessonData: {fileID: 11400000, guid: b401edf6d901c3a40bfecf31a3d67415, type: 2}
   doneLessonSprite: {fileID: 21300000, guid: 09b7505717795c4409efe5a06a67a972, type: 3}
 --- !u!21 &1936990649
 Material:
@@ -7991,7 +7971,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fb37f8d14bcaaec4898c657da4cd217f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::LessonButton
-  lessonData: {fileID: 11400000, guid: b4049123de9284845ab8ed01dc39b344, type: 2}
   doneLessonSprite: {fileID: 21300000, guid: 09b7505717795c4409efe5a06a67a972, type: 3}
 --- !u!1 &2005254424
 GameObject:
@@ -8568,7 +8547,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fb37f8d14bcaaec4898c657da4cd217f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::LessonButton
-  lessonData: {fileID: 11400000, guid: 8739d272b97277e43a637fe8dde3c174, type: 2}
   doneLessonSprite: {fileID: 21300000, guid: 09b7505717795c4409efe5a06a67a972, type: 3}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:

@@ -16,9 +16,6 @@ public class GoogleSheetsLessonSettings
     [Tooltip("Load lesson data from Google Sheets CSV instead of serialized lesson assets.")]
     public bool enabled = true;
 
-    [Tooltip("If Google Sheets is not configured or fails, keep using the serialized lessons already assigned in the scene.")]
-    public bool useSerializedLessonsAsFallback = true;
-
     [Tooltip("Request timeout in seconds for sheet and media downloads.")]
     public float requestTimeout = 20f;
 
@@ -70,7 +67,7 @@ public class GoogleSheetCsvSource
 
 public static class GoogleSheetsLessonLoader
 {
-    private const string GoogleSheetsExportUrl = "https://docs.google.com/spreadsheets/d/{0}/export?format=csv&gid={1}";
+    private const string GoogleSheetsExportUrl = "https://docs.google.com/spreadsheets/d/{0}/gviz/tq?tqx=out:csv&gid={1}";
     private static readonly Regex SpreadsheetIdRegex = new Regex(@"/spreadsheets/d/([^/?#]+)", RegexOptions.IgnoreCase);
     private static readonly Regex QueryValueRegex = new Regex(@"[?&#]gid=([^&#]+)", RegexOptions.IgnoreCase);
     private static readonly Regex HeaderCleanupRegex = new Regex(@"[\s\-]+");
@@ -109,7 +106,14 @@ public static class GoogleSheetsLessonLoader
                     continue;
                 }
 
-                List<SheetRow> rows = CsvTableParser.Parse(request.downloadHandler.text, source.DisplayName);
+                string csv = request.downloadHandler.text;
+                if (LooksLikeHtml(csv))
+                {
+                    onError?.Invoke($"Google Sheets source '{source.DisplayName}' returned HTML instead of CSV. Check sharing permissions and sheet URL.");
+                    continue;
+                }
+
+                List<SheetRow> rows = CsvTableParser.Parse(csv, source.DisplayName);
                 allRows.AddRange(rows);
             }
         }
@@ -174,6 +178,16 @@ public static class GoogleSheetsLessonLoader
     {
         return value.StartsWith("http://", StringComparison.OrdinalIgnoreCase) ||
                value.StartsWith("https://", StringComparison.OrdinalIgnoreCase);
+    }
+
+    private static bool LooksLikeHtml(string value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+            return false;
+
+        string trimmed = value.TrimStart();
+        return trimmed.StartsWith("<!DOCTYPE", StringComparison.OrdinalIgnoreCase) ||
+               trimmed.StartsWith("<html", StringComparison.OrdinalIgnoreCase);
     }
 
     private static string NormalizeHeader(string value)

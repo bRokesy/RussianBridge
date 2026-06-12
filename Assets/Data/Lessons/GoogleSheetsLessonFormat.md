@@ -10,6 +10,12 @@ Current default source:
 https://docs.google.com/spreadsheets/d/1yRbTMZg8SgXaNTiQQNOsASyODc1wdJIttJ746R5QI9s/edit?usp=sharing
 ```
 
+Runtime CSV endpoint used by Unity:
+
+```text
+https://docs.google.com/spreadsheets/d/1yRbTMZg8SgXaNTiQQNOsASyODc1wdJIttJ746R5QI9s/gviz/tq?tqx=out:csv&gid=0
+```
+
 Required columns:
 
 | column | value |

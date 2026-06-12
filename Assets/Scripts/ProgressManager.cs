@@ -14,7 +14,7 @@ public class ProgressManager : MonoBehaviour
     public static string CurrentLessonTitle;
 
     [Header("Уроки по порядку")]
-    public List<LessonData> lessons;
+    [NonSerialized] public List<LessonData> lessons = new List<LessonData>();
 
     [Header("Google Sheets")]
     [SerializeField] private GoogleSheetsLessonSettings googleSheetsLessonSettings = new GoogleSheetsLessonSettings();
@@ -203,10 +203,10 @@ public class ProgressManager : MonoBehaviour
                 googleSheetsLessonSettings.enabled &&
                 !googleSheetsLessonSettings.HasSources())
             {
-                Debug.LogWarning("ProgressManager: Google Sheets lesson source is enabled, but no sheet sources are configured. Using serialized lessons.");
+                Debug.LogError("ProgressManager: Google Sheets lesson source is enabled, but no sheet sources are configured.");
             }
 
-            UseSerializedLessonsCatalog();
+            ClearLoadedLessons();
             yield break;
         }
 
@@ -233,19 +233,9 @@ public class ProgressManager : MonoBehaviour
         }
 
         if (!string.IsNullOrWhiteSpace(loadError))
-            Debug.LogWarning("ProgressManager: Google Sheets lesson loading failed: " + loadError);
+            Debug.LogError("ProgressManager: Google Sheets lesson loading failed: " + loadError);
 
-        if (googleSheetsLessonSettings == null || googleSheetsLessonSettings.useSerializedLessonsAsFallback)
-        {
-            UseSerializedLessonsCatalog();
-        }
-        else
-        {
-            lessonCatalogLoaded = true;
-            if (lessons == null)
-                lessons = new List<LessonData>();
-            lessons.Clear();
-        }
+        ClearLoadedLessons();
     }
 
     public LessonData GetLessonByNumber(int lessonNumber)
@@ -253,11 +243,10 @@ public class ProgressManager : MonoBehaviour
         if (lessonNumber <= 0)
             return null;
 
-        List<LessonData> source = lessonCatalog.Count > 0 ? lessonCatalog : lessons;
         int index = lessonNumber - 1;
 
-        return source != null && index >= 0 && index < source.Count
-            ? source[index]
+        return index >= 0 && index < lessonCatalog.Count
+            ? lessonCatalog[index]
             : null;
     }
 
@@ -464,18 +453,14 @@ public class ProgressManager : MonoBehaviour
                googleSheetsLessonSettings.HasSources();
     }
 
-    private void UseSerializedLessonsCatalog()
+    private void ClearLoadedLessons()
     {
         lessonCatalog.Clear();
 
-        if (lessons != null)
-        {
-            foreach (LessonData lesson in lessons)
-            {
-                if (lesson != null)
-                    lessonCatalog.Add(lesson);
-            }
-        }
+        if (lessons == null)
+            lessons = new List<LessonData>();
+
+        lessons.Clear();
 
         lessonCatalogLoaded = true;
     }

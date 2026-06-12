@@ -6,7 +6,6 @@ using UnityEngine.UI;
 
 public class LessonButton : MonoBehaviour
 {
-    public LessonData lessonData;
     [SerializeField] private Sprite doneLessonSprite;
 
     private Button button;
@@ -92,11 +91,7 @@ public class LessonButton : MonoBehaviour
         if (progressManager == null)
             progressManager = ProgressManager.Instance;
 
-        LessonData catalogLesson = progressManager?.GetLessonByNumber(lessonNumber);
-        if (catalogLesson != null)
-            return catalogLesson;
-
-        return lessonData;
+        return progressManager?.GetLessonByNumber(lessonNumber);
     }
 
     private void RefreshState()

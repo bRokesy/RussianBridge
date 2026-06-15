@@ -73,7 +73,7 @@ public class LessonButton : MonoBehaviour
             yield break;
         }
 
-        progressManager.SetActiveLesson(selectedLesson);
+        progressManager.SetActiveLesson(selectedLesson, lessonNumber);
         SceneManager.LoadScene(SceneNames.LessonScene);
     }
 

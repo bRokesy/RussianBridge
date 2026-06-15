@@ -49,6 +49,7 @@ public class ProgressManager : MonoBehaviour
 
     private int currentLesson;
     private int currentExercise;
+    private int activeLessonNumber = -1;
     private int lastSyncedLesson = -1;
     private int lastSyncedExercise = -1;
     private bool isChangingExercise;
@@ -324,6 +325,11 @@ public class ProgressManager : MonoBehaviour
 
     public void SetActiveLesson(LessonData selectedLesson)
     {
+        SetActiveLesson(selectedLesson, GetCatalogLessonNumber(selectedLesson));
+    }
+
+    public void SetActiveLesson(LessonData selectedLesson, int lessonNumber)
+    {
         if (lessons == null)
             lessons = new List<LessonData>();
 
@@ -332,6 +338,9 @@ public class ProgressManager : MonoBehaviour
         if (selectedLesson != null)
             lessons.Add(selectedLesson);
 
+        activeLessonNumber = selectedLesson != null && lessonNumber > 0
+            ? lessonNumber
+            : -1;
         currentLesson = 0;
         currentExercise = 0;
         lastSyncedLesson = -1;
@@ -610,10 +619,11 @@ public class ProgressManager : MonoBehaviour
         EnsureDatabase();
 
         Timestamp now = Timestamp.GetCurrentTimestamp();
+        int currentLessonNumber = GetLessonNumberForCompletion(lesson, currentLesson);
         Dictionary<string, object> updates = new Dictionary<string, object>
         {
             { FirestoreFields.CurrentLesson, lesson.lessonName },
-            { FirestoreFields.CurrentLessonIndex, currentLesson },
+            { FirestoreFields.CurrentLessonIndex, currentLessonNumber - 1 },
             { FirestoreFields.CurrentExerciseIndex, currentExercise },
             { FirestoreFields.CurrentLessonUpdatedAt, now }
         };
@@ -629,6 +639,13 @@ public class ProgressManager : MonoBehaviour
 
     private IEnumerator SendLessonCompleteToFirebase(int lessonIndex)
     {
+        if (lessons == null || lessonIndex < 0 || lessonIndex >= lessons.Count)
+            yield break;
+
+        LessonData lesson = lessons[lessonIndex];
+        int completedLessonNumber = GetLessonNumberForCompletion(lesson, lessonIndex);
+        ApplyLocalLessonCompletion(lesson, completedLessonNumber);
+
         string uid = References.userId;
 
         if (string.IsNullOrEmpty(uid))
@@ -637,13 +654,9 @@ public class ProgressManager : MonoBehaviour
             yield break;
         }
 
-        if (lessons == null || lessonIndex < 0 || lessonIndex >= lessons.Count)
-            yield break;
-
         EnsureDatabase();
 
-        LessonData lesson = lessons[lessonIndex];
-        string lessonKey = GetLessonKey(lesson, lessonIndex);
+        string lessonKey = GetLessonKey(lesson, completedLessonNumber - 1);
 
         DocumentReference userRef = database.Collection(FirestoreCollections.Users).Document(uid);
         DocumentReference lessonRef = userRef.Collection(FirestoreCollections.LessonProgress).Document(lessonKey);
@@ -658,13 +671,11 @@ public class ProgressManager : MonoBehaviour
         }
 
         int previousScore = 0;
-        bool wasCompleted = false;
 
         DocumentSnapshot snapshot = getTask.Result;
         if (snapshot.Exists)
         {
             snapshot.TryGetValue(FirestoreFields.Score, out previousScore);
-            snapshot.TryGetValue(FirestoreFields.Completed, out wasCompleted);
         }
 
         int score = 100;
@@ -673,7 +684,7 @@ public class ProgressManager : MonoBehaviour
 
         Dictionary<string, object> lessonUpdates = new Dictionary<string, object>
         {
-            { FirestoreFields.LessonIndex, lessonIndex },
+            { FirestoreFields.LessonIndex, completedLessonNumber - 1 },
             { FirestoreFields.LessonName, lesson.lessonName },
             { FirestoreFields.TotalExercises, lesson.Count },
             { FirestoreFields.Score, score },
@@ -694,12 +705,12 @@ public class ProgressManager : MonoBehaviour
         Dictionary<string, object> userUpdates = new Dictionary<string, object>
         {
             { FirestoreFields.CurrentLesson, lesson.lessonName },
-            { FirestoreFields.CurrentLessonIndex, lessonIndex },
+            { FirestoreFields.CurrentLessonIndex, completedLessonNumber - 1 },
             { FirestoreFields.CurrentExerciseIndex, lesson.Count - 1 },
             { FirestoreFields.Experience, References.experience + awardedScore },
-            { FirestoreFields.CompletedLessons, References.completedLessons + (wasCompleted ? 0 : 1) },
+            { FirestoreFields.CompletedLessons, Mathf.Max(References.completedLessons, completedLessonNumber) },
             { FirestoreFields.LastCompletedLesson, lesson.lessonName },
-            { FirestoreFields.LastCompletedLessonIndex, lessonIndex },
+            { FirestoreFields.LastCompletedLessonIndex, completedLessonNumber - 1 },
             { FirestoreFields.LastProgressUpdate, now }
         };
 
@@ -713,10 +724,40 @@ public class ProgressManager : MonoBehaviour
         }
 
         References.experience += awardedScore;
-        if (!wasCompleted) References.completedLessons++;
-        References.currentLesson = lesson.lessonName;
+        ApplyLocalLessonCompletion(lesson, completedLessonNumber);
 
         Debug.Log($"ProgressManager: урок '{lesson.lessonName}' завершён, начислено {awardedScore}/100 очков.");
+    }
+
+    private void ApplyLocalLessonCompletion(LessonData lesson, int lessonNumber)
+    {
+        if (lesson == null)
+            return;
+
+        References.currentLesson = lesson.lessonName;
+
+        if (lessonNumber > 0)
+            References.completedLessons = Mathf.Max(References.completedLessons, lessonNumber);
+
+        RefreshLessonButtons();
+    }
+
+    private int GetLessonNumberForCompletion(LessonData lesson, int lessonIndex)
+    {
+        if (activeLessonNumber > 0)
+            return activeLessonNumber;
+
+        int catalogLessonNumber = GetCatalogLessonNumber(lesson);
+        return catalogLessonNumber > 0 ? catalogLessonNumber : lessonIndex + 1;
+    }
+
+    private int GetCatalogLessonNumber(LessonData lesson)
+    {
+        if (lesson == null || lessonCatalog == null)
+            return 0;
+
+        int catalogIndex = lessonCatalog.IndexOf(lesson);
+        return catalogIndex >= 0 ? catalogIndex + 1 : 0;
     }
 
     private void EnsureDatabase()

@@ -1,0 +1,11 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources xmlns:tools="http://schemas.android.com/tools" tools:keep="@string/firebase_database_url,@string/gcm_defaultSenderId,@string/google_storage_bucket,@string/project_id,@string/google_api_key,@string/google_crash_reporting_api_key,@string/google_app_id,@string/default_web_client_id">
+  <string name="firebase_database_url" translatable="false">null</string>
+  <string name="gcm_defaultSenderId" translatable="false">534995885505</string>
+  <string name="google_storage_bucket" translatable="false">russian-bridge-7480a.firebasestorage.app</string>
+  <string name="project_id" translatable="false">russian-bridge-7480a</string>
+  <string name="google_api_key" translatable="false">AIzaSyBmIESNBtWAiAuKtzCJg68JJIjig8WVOYI</string>
+  <string name="google_crash_reporting_api_key" translatable="false">AIzaSyBmIESNBtWAiAuKtzCJg68JJIjig8WVOYI</string>
+  <string name="google_app_id" translatable="false">1:534995885505:android:307e4dc5790dd161a12340</string>
+  <string name="default_web_client_id" translatable="false">534995885505-24iutdeglifki448gu7h1sjuapl0t61c.apps.googleusercontent.com</string>
+</resources>

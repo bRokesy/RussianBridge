@@ -5308,9 +5308,9 @@ MonoBehaviour:
       csvUrl: 
   nextExerciseDelay: 1.5
   manualLessonTesting:
-    enabled: 1
-    activateAllLessons: 1
-    activatedLessons: 02000000
+    enabled: 0
+    activateAllLessons: 0
+    activatedLessons: 
     deactivatedLessons: 
   progressLabel: {fileID: 0}
   nextButton: {fileID: 0}

@@ -283,7 +283,7 @@ MonoBehaviour:
   m_text: "\u86CB\u7CD5"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8a95911189b99074f813a1d98b24ac4f, type: 2}
-  m_sharedMaterial: {fileID: 4896193773874073063, guid: b13425aa1fc52480da04a2fc1effd940, type: 2}
+  m_sharedMaterial: {fileID: 4482600098274225961, guid: 8a95911189b99074f813a1d98b24ac4f, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []

@@ -10,6 +10,22 @@ using UnityEngine.UI;
 
 public class ProgressManager : MonoBehaviour
 {
+    [Serializable]
+    private class ManualLessonTestingSettings
+    {
+        [Tooltip("Overrides lesson button locking on MainMenu for manual QA.")]
+        public bool enabled;
+
+        [Tooltip("Makes every lesson button available unless its number is listed in deactivatedLessons.")]
+        public bool activateAllLessons;
+
+        [Tooltip("Lesson numbers that should be available even if normal progress keeps them locked.")]
+        public List<int> activatedLessons = new List<int>();
+
+        [Tooltip("Lesson numbers that should be unavailable even if normal progress has unlocked them.")]
+        public List<int> deactivatedLessons = new List<int>();
+    }
+
     public static ProgressManager Instance { get; private set; }
     public static string CurrentLessonTitle;
 
@@ -21,6 +37,9 @@ public class ProgressManager : MonoBehaviour
 
     [Header("Timing")]
     public float nextExerciseDelay = 1.5f;
+
+    [Header("Manual Lesson Testing")]
+    [SerializeField] private ManualLessonTestingSettings manualLessonTesting = new ManualLessonTestingSettings();
 
     [Header("Navigation UI (опционально)")]
     public TextMeshProUGUI progressLabel;
@@ -58,6 +77,7 @@ public class ProgressManager : MonoBehaviour
     {
         ResolveNavigationReferences();
         BindButtons();
+        RefreshLessonButtons();
         StartCoroutine(LoadAfterFrame());
     }
 
@@ -248,6 +268,58 @@ public class ProgressManager : MonoBehaviour
         return index >= 0 && index < lessonCatalog.Count
             ? lessonCatalog[index]
             : null;
+    }
+
+    public bool IsLessonUnlocked(int lessonNumber)
+    {
+        if (lessonNumber <= 0)
+            return false;
+
+        if (manualLessonTesting == null || !manualLessonTesting.enabled)
+            return IsLessonUnlockedByProgress(lessonNumber);
+
+        if (ContainsLessonNumber(manualLessonTesting.deactivatedLessons, lessonNumber))
+            return false;
+
+        if (manualLessonTesting.activateAllLessons ||
+            ContainsLessonNumber(manualLessonTesting.activatedLessons, lessonNumber))
+            return true;
+
+        return IsLessonUnlockedByProgress(lessonNumber);
+    }
+
+    public void ActivateLessonForManualTesting(int lessonNumber)
+    {
+        if (lessonNumber <= 0)
+            return;
+
+        EnsureManualLessonTestingSettings();
+        manualLessonTesting.enabled = true;
+        AddLessonNumber(manualLessonTesting.activatedLessons, lessonNumber);
+        RemoveLessonNumber(manualLessonTesting.deactivatedLessons, lessonNumber);
+        RefreshLessonButtons();
+    }
+
+    public void DeactivateLessonForManualTesting(int lessonNumber)
+    {
+        if (lessonNumber <= 0)
+            return;
+
+        EnsureManualLessonTestingSettings();
+        manualLessonTesting.enabled = true;
+        RemoveLessonNumber(manualLessonTesting.activatedLessons, lessonNumber);
+        AddLessonNumber(manualLessonTesting.deactivatedLessons, lessonNumber);
+        RefreshLessonButtons();
+    }
+
+    public void ClearManualLessonTesting()
+    {
+        EnsureManualLessonTestingSettings();
+        manualLessonTesting.enabled = false;
+        manualLessonTesting.activateAllLessons = false;
+        manualLessonTesting.activatedLessons.Clear();
+        manualLessonTesting.deactivatedLessons.Clear();
+        RefreshLessonButtons();
     }
 
     public void SetActiveLesson(LessonData selectedLesson)
@@ -446,6 +518,48 @@ public class ProgressManager : MonoBehaviour
         PlayerPrefs.Save();
     }
 
+    private static bool IsLessonUnlockedByProgress(int lessonNumber)
+    {
+        return lessonNumber <= 1 || References.completedLessons >= lessonNumber - 1;
+    }
+
+    private static bool ContainsLessonNumber(List<int> lessonNumbers, int lessonNumber)
+    {
+        return lessonNumbers != null && lessonNumbers.Contains(lessonNumber);
+    }
+
+    private static void AddLessonNumber(List<int> lessonNumbers, int lessonNumber)
+    {
+        if (lessonNumbers != null && !lessonNumbers.Contains(lessonNumber))
+            lessonNumbers.Add(lessonNumber);
+    }
+
+    private static void RemoveLessonNumber(List<int> lessonNumbers, int lessonNumber)
+    {
+        lessonNumbers?.RemoveAll(number => number == lessonNumber);
+    }
+
+    private void EnsureManualLessonTestingSettings()
+    {
+        if (manualLessonTesting == null)
+            manualLessonTesting = new ManualLessonTestingSettings();
+
+        if (manualLessonTesting.activatedLessons == null)
+            manualLessonTesting.activatedLessons = new List<int>();
+
+        if (manualLessonTesting.deactivatedLessons == null)
+            manualLessonTesting.deactivatedLessons = new List<int>();
+    }
+
+    private void RefreshLessonButtons()
+    {
+        if (SceneManager.GetActiveScene().name != SceneNames.MainMenu)
+            return;
+
+        foreach (LessonButton lessonButton in FindObjectsByType<LessonButton>(FindObjectsSortMode.None))
+            lessonButton.RefreshState();
+    }
+
     private bool ShouldLoadGoogleSheets()
     {
         return googleSheetsLessonSettings != null &&
@@ -641,7 +755,16 @@ public class ProgressManager : MonoBehaviour
         scenePanels = null;
         ResolveNavigationReferences();
         BindButtons();
+        RefreshLessonButtons();
         StartCoroutine(LoadAfterFrame());
+    }
+
+    private void OnValidate()
+    {
+        EnsureManualLessonTestingSettings();
+
+        if (Application.isPlaying)
+            RefreshLessonButtons();
     }
 
     private void OnDestroy()

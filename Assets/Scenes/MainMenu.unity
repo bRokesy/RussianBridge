@@ -5304,8 +5304,14 @@ MonoBehaviour:
     - name: RussianBridge Lessons
       spreadsheetIdOrUrl: https://docs.google.com/spreadsheets/d/1yRbTMZg8SgXaNTiQQNOsASyODc1wdJIttJ746R5QI9s/edit?usp=sharing
       gid: 0
+      loadAllWorksheets: 1
       csvUrl: 
   nextExerciseDelay: 1.5
+  manualLessonTesting:
+    enabled: 1
+    activateAllLessons: 1
+    activatedLessons: 02000000
+    deactivatedLessons: 
   progressLabel: {fileID: 0}
   nextButton: {fileID: 0}
   prevButton: {fileID: 0}

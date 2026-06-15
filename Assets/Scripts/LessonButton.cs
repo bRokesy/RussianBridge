@@ -38,7 +38,7 @@ public class LessonButton : MonoBehaviour
     {
         if (!IsUnlocked())
         {
-            Debug.Log($"LessonButton: lesson {lessonNumber} is locked. Complete the previous lesson first.");
+            Debug.Log($"LessonButton: lesson {lessonNumber} is locked or disabled.");
             return;
         }
 
@@ -94,7 +94,7 @@ public class LessonButton : MonoBehaviour
         return progressManager?.GetLessonByNumber(lessonNumber);
     }
 
-    private void RefreshState()
+    public void RefreshState()
     {
         if (lessonNumber <= 0)
             return;
@@ -108,7 +108,13 @@ public class LessonButton : MonoBehaviour
 
     private bool IsUnlocked()
     {
-        return lessonNumber <= 1 || References.completedLessons >= lessonNumber - 1;
+        ProgressManager progressManager = ProgressManager.Instance;
+        if (progressManager == null)
+            progressManager = FindFirstObjectByType<ProgressManager>();
+
+        return progressManager != null
+            ? progressManager.IsLessonUnlocked(lessonNumber)
+            : lessonNumber <= 1 || References.completedLessons >= lessonNumber - 1;
     }
 
     private bool IsCompleted()

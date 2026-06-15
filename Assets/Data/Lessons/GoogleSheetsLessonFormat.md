@@ -1,8 +1,16 @@
 # Google Sheets lesson format
 
-Publish a Google Sheets tab as CSV, or paste a normal Google Sheets URL into
-`ProgressManager > Google Sheets > Sources`. The loader accepts a spreadsheet id,
-a full Google Sheets URL, or a direct CSV URL.
+Paste a normal Google Sheets URL into `ProgressManager > Google Sheets > Sources`.
+The loader accepts a spreadsheet id, a full Google Sheets URL, or a direct CSV
+URL.
+
+Preferred workbook layout:
+
+- one worksheet per lesson;
+- worksheet names should be `Lesson1`, `Lesson2`, `Lesson3`, and so on;
+- every lesson worksheet must keep the same header row;
+- service worksheets such as `Summary` and `README` are allowed and skipped by
+  the loader.
 
 Current default source:
 
@@ -10,10 +18,11 @@ Current default source:
 https://docs.google.com/spreadsheets/d/1yRbTMZg8SgXaNTiQQNOsASyODc1wdJIttJ746R5QI9s/edit?usp=sharing
 ```
 
-Runtime CSV endpoint used by Unity:
+Runtime CSV endpoints used by Unity are discovered from the public spreadsheet
+page. Each lesson worksheet is then loaded through a CSV endpoint like this:
 
 ```text
-https://docs.google.com/spreadsheets/d/1yRbTMZg8SgXaNTiQQNOsASyODc1wdJIttJ746R5QI9s/gviz/tq?tqx=out:csv&gid=0
+https://docs.google.com/spreadsheets/d/1yRbTMZg8SgXaNTiQQNOsASyODc1wdJIttJ746R5QI9s/gviz/tq?tqx=out:csv&gid=<worksheet_gid>
 ```
 
 Required columns:

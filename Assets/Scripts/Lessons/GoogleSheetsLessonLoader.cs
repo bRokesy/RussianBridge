@@ -19,14 +19,15 @@ public class GoogleSheetsLessonSettings
     [Tooltip("Request timeout in seconds for sheet and media downloads.")]
     public float requestTimeout = 20f;
 
-    [Tooltip("One or more Google Sheets tabs exported as CSV. Multiple tabs are merged into one lesson catalog.")]
+    [Tooltip("One or more Google Sheets sources. A normal spreadsheet URL can load all lesson worksheets automatically.")]
     public List<GoogleSheetCsvSource> sources = new List<GoogleSheetCsvSource>
     {
         new GoogleSheetCsvSource
         {
             name = "RussianBridge Lessons",
             spreadsheetIdOrUrl = DefaultLessonsSpreadsheetUrl,
-            gid = "0"
+            gid = "0",
+            loadAllWorksheets = true
         }
     };
 
@@ -48,6 +49,9 @@ public class GoogleSheetCsvSource
     [Tooltip("Sheet tab gid. Used when spreadsheetIdOrUrl is only an id, or when the URL has no gid.")]
     public string gid = "0";
 
+    [Tooltip("When enabled, all lesson tabs in the spreadsheet are discovered and merged automatically.")]
+    public bool loadAllWorksheets = true;
+
     [Tooltip("Optional direct CSV URL. If set, this is used before spreadsheetIdOrUrl.")]
     public string csvUrl;
 
@@ -58,8 +62,22 @@ public class GoogleSheetCsvSource
 
     public string BuildCsvUrl()
     {
+        return BuildCsvUrl(gid);
+    }
+
+    public string BuildCsvUrl(string gidOverride)
+    {
         string raw = !string.IsNullOrWhiteSpace(csvUrl) ? csvUrl : spreadsheetIdOrUrl;
-        return GoogleSheetsLessonLoader.ToCsvUrl(raw, gid);
+        return GoogleSheetsLessonLoader.ToCsvUrl(raw, gidOverride);
+    }
+
+    public bool CanDiscoverWorksheets()
+    {
+        if (!loadAllWorksheets || !string.IsNullOrWhiteSpace(csvUrl) || string.IsNullOrWhiteSpace(spreadsheetIdOrUrl))
+            return false;
+
+        string spreadsheetId;
+        return GoogleSheetsLessonLoader.TryGetSpreadsheetId(spreadsheetIdOrUrl, out spreadsheetId);
     }
 
     public string DisplayName => string.IsNullOrWhiteSpace(name) ? BuildCsvUrl() : name;
@@ -68,9 +86,13 @@ public class GoogleSheetCsvSource
 public static class GoogleSheetsLessonLoader
 {
     private const string GoogleSheetsExportUrl = "https://docs.google.com/spreadsheets/d/{0}/gviz/tq?tqx=out:csv&gid={1}";
+    private const string GoogleSheetsEditUrl = "https://docs.google.com/spreadsheets/d/{0}/edit";
     private static readonly Regex SpreadsheetIdRegex = new Regex(@"/spreadsheets/d/([^/?#]+)", RegexOptions.IgnoreCase);
     private static readonly Regex QueryValueRegex = new Regex(@"[?&#]gid=([^&#]+)", RegexOptions.IgnoreCase);
     private static readonly Regex HeaderCleanupRegex = new Regex(@"[\s\-]+");
+    private static readonly Regex WorksheetMetadataRegex = new Regex("\\[21350203,\"\\[\\d+,0,\\\\\"(?<gid>\\d+)\\\\\".*?\\[\\[0,0,\\\\\"(?<title>[^\\\\\"]+)", RegexOptions.Singleline);
+    private static readonly Regex GidFallbackRegex = new Regex(@"gid(?:=|%3D)(\d+)", RegexOptions.IgnoreCase);
+    private static readonly Regex LessonWorksheetNameRegex = new Regex(@"^\s*lesson\s*\d+\s*$", RegexOptions.IgnoreCase);
 
     public static IEnumerator Load(
         GoogleSheetsLessonSettings settings,
@@ -91,30 +113,35 @@ public static class GoogleSheetsLessonLoader
             if (source == null || !source.HasValue())
                 continue;
 
-            string url = source.BuildCsvUrl();
-            if (string.IsNullOrWhiteSpace(url))
-                continue;
+            List<SheetDownload> downloads = null;
+            yield return ResolveDownloads(source, timeout, result => downloads = result);
 
-            using (UnityWebRequest request = UnityWebRequest.Get(url))
+            foreach (SheetDownload download in downloads)
             {
-                request.timeout = timeout;
-                yield return request.SendWebRequest();
-
-                if (request.result != UnityWebRequest.Result.Success)
-                {
-                    onError?.Invoke($"Failed to load lesson sheet '{source.DisplayName}': {request.error}");
+                if (string.IsNullOrWhiteSpace(download.Url))
                     continue;
-                }
 
-                string csv = request.downloadHandler.text;
-                if (LooksLikeHtml(csv))
+                using (UnityWebRequest request = UnityWebRequest.Get(download.Url))
                 {
-                    onError?.Invoke($"Google Sheets source '{source.DisplayName}' returned HTML instead of CSV. Check sharing permissions and sheet URL.");
-                    continue;
-                }
+                    request.timeout = timeout;
+                    yield return request.SendWebRequest();
 
-                List<SheetRow> rows = CsvTableParser.Parse(csv, source.DisplayName);
-                allRows.AddRange(rows);
+                    if (request.result != UnityWebRequest.Result.Success)
+                    {
+                        onError?.Invoke($"Failed to load lesson sheet '{download.DisplayName}': {request.error}");
+                        continue;
+                    }
+
+                    string csv = request.downloadHandler.text;
+                    if (LooksLikeHtml(csv))
+                    {
+                        onError?.Invoke($"Google Sheets source '{download.DisplayName}' returned HTML instead of CSV. Check sharing permissions and sheet URL.");
+                        continue;
+                    }
+
+                    List<SheetRow> rows = CsvTableParser.Parse(csv, download.DisplayName);
+                    allRows.AddRange(rows);
+                }
             }
         }
 
@@ -154,11 +181,10 @@ public static class GoogleSheetsLessonLoader
             trimmed.IndexOf("format=csv", StringComparison.OrdinalIgnoreCase) >= 0)
             return trimmed;
 
-        Match match = SpreadsheetIdRegex.Match(trimmed);
-        if (!match.Success)
+        string spreadsheetId;
+        if (!TryGetSpreadsheetId(trimmed, out spreadsheetId))
             return trimmed;
 
-        string spreadsheetId = match.Groups[1].Value;
         string gidFromUrl = ExtractGid(trimmed);
         string gidValue = string.IsNullOrWhiteSpace(gidFromUrl) ? fallbackGid : gidFromUrl;
 
@@ -166,6 +192,152 @@ public static class GoogleSheetsLessonLoader
             gidValue = "0";
 
         return string.Format(GoogleSheetsExportUrl, spreadsheetId, gidValue);
+    }
+
+    public static bool TryGetSpreadsheetId(string value, out string spreadsheetId)
+    {
+        spreadsheetId = string.Empty;
+
+        if (string.IsNullOrWhiteSpace(value))
+            return false;
+
+        string trimmed = value.Trim();
+        if (!IsHttpUrl(trimmed))
+        {
+            spreadsheetId = trimmed;
+            return true;
+        }
+
+        Match match = SpreadsheetIdRegex.Match(trimmed);
+        if (!match.Success)
+            return false;
+
+        spreadsheetId = match.Groups[1].Value;
+        return !string.IsNullOrWhiteSpace(spreadsheetId);
+    }
+
+    private static IEnumerator ResolveDownloads(
+        GoogleSheetCsvSource source,
+        int timeout,
+        Action<List<SheetDownload>> onResolved)
+    {
+        List<SheetDownload> downloads = new List<SheetDownload>();
+
+        if (source.CanDiscoverWorksheets())
+        {
+            List<WorksheetInfo> worksheets = null;
+            yield return DiscoverWorksheets(source, timeout, result => worksheets = result);
+
+            if (worksheets != null && worksheets.Count > 0)
+            {
+                List<WorksheetInfo> lessonWorksheets = worksheets
+                    .Where(worksheet => IsLessonWorksheetName(worksheet.Title))
+                    .ToList();
+
+                if (lessonWorksheets.Count > 0)
+                    worksheets = lessonWorksheets;
+
+                foreach (WorksheetInfo worksheet in worksheets)
+                {
+                    downloads.Add(new SheetDownload
+                    {
+                        DisplayName = $"{source.DisplayName} / {worksheet.DisplayName}",
+                        Url = source.BuildCsvUrl(worksheet.Gid)
+                    });
+                }
+            }
+        }
+
+        if (downloads.Count == 0)
+        {
+            downloads.Add(new SheetDownload
+            {
+                DisplayName = source.DisplayName,
+                Url = source.BuildCsvUrl()
+            });
+        }
+
+        onResolved?.Invoke(downloads);
+    }
+
+    private static IEnumerator DiscoverWorksheets(
+        GoogleSheetCsvSource source,
+        int timeout,
+        Action<List<WorksheetInfo>> onDiscovered)
+    {
+        string spreadsheetId;
+        if (!TryGetSpreadsheetId(source.spreadsheetIdOrUrl, out spreadsheetId))
+        {
+            onDiscovered?.Invoke(new List<WorksheetInfo>());
+            yield break;
+        }
+
+        string url = string.Format(GoogleSheetsEditUrl, spreadsheetId);
+        using (UnityWebRequest request = UnityWebRequest.Get(url))
+        {
+            request.timeout = timeout;
+            yield return request.SendWebRequest();
+
+            if (request.result != UnityWebRequest.Result.Success)
+            {
+                Debug.LogWarning($"GoogleSheetsLessonLoader: failed to discover worksheets for '{source.DisplayName}': {request.error}. Falling back to configured gid.");
+                onDiscovered?.Invoke(new List<WorksheetInfo>());
+                yield break;
+            }
+
+            List<WorksheetInfo> worksheets = ExtractWorksheetInfos(request.downloadHandler.text);
+            if (worksheets.Count == 0)
+                Debug.LogWarning($"GoogleSheetsLessonLoader: no worksheet metadata found for '{source.DisplayName}'. Falling back to configured gid.");
+            else
+                Debug.Log($"GoogleSheetsLessonLoader: discovered {worksheets.Count} worksheet(s) in '{source.DisplayName}'.");
+
+            onDiscovered?.Invoke(worksheets);
+        }
+    }
+
+    private static List<WorksheetInfo> ExtractWorksheetInfos(string html)
+    {
+        List<WorksheetInfo> worksheets = new List<WorksheetInfo>();
+        HashSet<string> seenGids = new HashSet<string>();
+
+        if (string.IsNullOrWhiteSpace(html))
+            return worksheets;
+
+        foreach (Match match in WorksheetMetadataRegex.Matches(html))
+        {
+            string gid = match.Groups["gid"].Value;
+            if (string.IsNullOrWhiteSpace(gid) || !seenGids.Add(gid))
+                continue;
+
+            worksheets.Add(new WorksheetInfo
+            {
+                Gid = gid,
+                Title = match.Groups["title"].Value
+            });
+        }
+
+        if (worksheets.Count > 0)
+            return worksheets;
+
+        foreach (Match match in GidFallbackRegex.Matches(html))
+        {
+            string gid = match.Groups[1].Value;
+            if (string.IsNullOrWhiteSpace(gid) || !seenGids.Add(gid))
+                continue;
+
+            worksheets.Add(new WorksheetInfo
+            {
+                Gid = gid,
+                Title = string.Empty
+            });
+        }
+
+        return worksheets;
+    }
+
+    private static bool IsLessonWorksheetName(string title)
+    {
+        return !string.IsNullOrWhiteSpace(title) && LessonWorksheetNameRegex.IsMatch(title.Trim());
     }
 
     private static string ExtractGid(string url)
@@ -724,6 +896,20 @@ public static class GoogleSheetsLessonLoader
         public UnityEngine.Object Data;
     }
 
+    private sealed class SheetDownload
+    {
+        public string DisplayName;
+        public string Url;
+    }
+
+    private sealed class WorksheetInfo
+    {
+        public string Gid;
+        public string Title;
+
+        public string DisplayName => string.IsNullOrWhiteSpace(Title) ? $"gid {Gid}" : Title;
+    }
+
     private sealed class SheetRow
     {
         private readonly Dictionary<string, string> values;
@@ -764,6 +950,11 @@ public static class GoogleSheetsLessonLoader
                 return rows;
 
             List<string> headers = records[0].Select(NormalizeHeader).ToList();
+            if (!HasRequiredLessonHeaders(headers))
+            {
+                Debug.Log($"GoogleSheetsLessonLoader: skipped '{sourceName}' because it is not a lesson worksheet.");
+                return rows;
+            }
 
             for (int rowIndex = 1; rowIndex < records.Count; rowIndex++)
             {
@@ -787,6 +978,13 @@ public static class GoogleSheetsLessonLoader
 
             Debug.Log($"GoogleSheetsLessonLoader: parsed {rows.Count} rows from '{sourceName}'.");
             return rows;
+        }
+
+        private static bool HasRequiredLessonHeaders(List<string> headers)
+        {
+            return headers.Contains("lesson_number") &&
+                   headers.Contains("exercise_order") &&
+                   headers.Contains("exercise_type");
         }
 
         private static List<List<string>> ParseRecords(string csv)

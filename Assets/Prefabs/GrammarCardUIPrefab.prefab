@@ -160,8 +160,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: "\u661F\u671F\u5929\u662F\u6211\u59B9\u59B9\u7684\u751F\u65E5\uFF0C\u6211\u4EEC\u4F1A\u4E70\u4E00\u4E2A\u5927\u86CB\u7CD5\uFF0C\u5E76\u5531\u300A\u751F\u65E5\u5FEB\u4E50\u300B\u6B4C\u3002"
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: b13425aa1fc52480da04a2fc1effd940, type: 2}
-  m_sharedMaterial: {fileID: 4896193773874073063, guid: b13425aa1fc52480da04a2fc1effd940, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 8a95911189b99074f813a1d98b24ac4f, type: 2}
+  m_sharedMaterial: {fileID: 4482600098274225961, guid: 8a95911189b99074f813a1d98b24ac4f, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -301,8 +301,8 @@ MonoBehaviour:
     \"\u043F\u043E\u0435\u0445\u0430\u0442\u044C\" \u548C \"\u043F\u043E\u0439\u0442\u0438\"
     \u5177\u6709\u5B8C\u6210\u4F53\u52A8\u8BCD\u7684\u901A\u5E38\u610F\u4E49\u3002\r\n"
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: b13425aa1fc52480da04a2fc1effd940, type: 2}
-  m_sharedMaterial: {fileID: 4896193773874073063, guid: b13425aa1fc52480da04a2fc1effd940, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 8a95911189b99074f813a1d98b24ac4f, type: 2}
+  m_sharedMaterial: {fileID: 4482600098274225961, guid: 8a95911189b99074f813a1d98b24ac4f, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -438,8 +438,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: "\u0442\u043E\u0440\u0442"
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: b13425aa1fc52480da04a2fc1effd940, type: 2}
-  m_sharedMaterial: {fileID: 4896193773874073063, guid: b13425aa1fc52480da04a2fc1effd940, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 8a95911189b99074f813a1d98b24ac4f, type: 2}
+  m_sharedMaterial: {fileID: 4482600098274225961, guid: 8a95911189b99074f813a1d98b24ac4f, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -580,8 +580,8 @@ MonoBehaviour:
     \u043F\u0435\u0442\u044C \u043F\u0435\u0441\u043D\u044E \xAB\u0421 \u0434\u043D\u0451\u043C
     \u0440\u043E\u0436\u0434\u0435\u043D\u0438\u044F!\xBB"
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: b13425aa1fc52480da04a2fc1effd940, type: 2}
-  m_sharedMaterial: {fileID: 4896193773874073063, guid: b13425aa1fc52480da04a2fc1effd940, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 8a95911189b99074f813a1d98b24ac4f, type: 2}
+  m_sharedMaterial: {fileID: 4482600098274225961, guid: 8a95911189b99074f813a1d98b24ac4f, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []

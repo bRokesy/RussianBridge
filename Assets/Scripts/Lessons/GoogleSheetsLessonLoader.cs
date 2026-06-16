@@ -395,6 +395,23 @@ public static class GoogleSheetsLessonLoader
         return path.Trim('/');
     }
 
+    private static string NormalizeProjectAssetPath(string value)
+    {
+        string path = value.Trim().Trim('"').Replace('\\', '/');
+
+        if (path.StartsWith("asset:", StringComparison.OrdinalIgnoreCase))
+            path = path.Substring("asset:".Length);
+
+        if (path.StartsWith("Assets/", StringComparison.OrdinalIgnoreCase))
+            return "Assets/" + path.Substring("Assets/".Length).TrimStart('/');
+
+        string dataPath = Application.dataPath.Replace('\\', '/');
+        if (path.StartsWith(dataPath + "/", StringComparison.OrdinalIgnoreCase))
+            return "Assets/" + path.Substring(dataPath.Length).TrimStart('/');
+
+        return string.Empty;
+    }
+
     private static List<string> SplitList(string value)
     {
         List<string> result = new List<string>();
@@ -795,14 +812,55 @@ public static class GoogleSheetsLessonLoader
             }
             else
             {
+                sprite = LoadProjectSprite(key);
+
                 string resourcePath = NormalizeResourcePath(key);
-                sprite = Resources.Load<Sprite>(resourcePath);
                 if (sprite == null)
-                    Debug.LogWarning($"GoogleSheetsLessonLoader: Sprite Resources path not found: '{resourcePath}'.");
+                    sprite = Resources.Load<Sprite>(resourcePath);
+
+                if (sprite == null)
+                {
+                    string projectAssetPath = NormalizeProjectAssetPath(key);
+                    if (!string.IsNullOrWhiteSpace(projectAssetPath))
+                    {
+                        Debug.LogWarning(
+                            $"GoogleSheetsLessonLoader: Sprite project path not found: '{projectAssetPath}'. " +
+                            "In a player build, use an https URL or move the image under Assets/Resources.");
+                    }
+                    else
+                    {
+                        Debug.LogWarning($"GoogleSheetsLessonLoader: Sprite Resources path not found: '{resourcePath}'.");
+                    }
+                }
             }
 
             spriteCache[key] = sprite;
             onLoaded?.Invoke(sprite);
+        }
+
+        private static Sprite LoadProjectSprite(string value)
+        {
+#if UNITY_EDITOR
+            string assetPath = NormalizeProjectAssetPath(value);
+            if (string.IsNullOrWhiteSpace(assetPath))
+                return null;
+
+            Sprite sprite = UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>(assetPath);
+            if (sprite != null)
+                return sprite;
+
+            if (Path.HasExtension(assetPath))
+                return null;
+
+            string[] extensions = { ".png", ".jpg", ".jpeg", ".psd", ".tga" };
+            foreach (string extension in extensions)
+            {
+                sprite = UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>(assetPath + extension);
+                if (sprite != null)
+                    return sprite;
+            }
+#endif
+            return null;
         }
 
         private IEnumerator LoadAudio(string value, Action<AudioClip> onLoaded)

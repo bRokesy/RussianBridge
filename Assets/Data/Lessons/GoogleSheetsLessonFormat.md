@@ -41,7 +41,7 @@ Common optional columns:
 | `exercise_title` | Any exercise type. |
 | `task_title` | `FillBlank`, `MakeSentence`. |
 | `hint` | `FillBlank`, `MakeSentence`. |
-| `image` | `Translate`, `Flashcards`. Use a URL or a `Resources` path. |
+| `image` | `Translate`, `Flashcards`. Use a URL, a `Resources` path, or an editor-only project asset path. |
 | `audio` | `Translate`, `Writing`, `Flashcards`. Use a URL or a `Resources` path. |
 
 Type-specific columns:
@@ -68,7 +68,10 @@ Media cells can be either:
 ```text
 Images/Lesson1/card1
 Assets/Resources/Images/Lesson1/card1.png
+Assets/Sprites/Lesson/Lesson1/L1_Ex2.png
 https://example.com/card1.png
 ```
 
 For `Resources` paths, Unity requires the file to be under `Assets/Resources`.
+Project asset paths such as `Assets/Sprites/...` work in Editor Play Mode only;
+use URLs or `Assets/Resources/...` paths for player builds.

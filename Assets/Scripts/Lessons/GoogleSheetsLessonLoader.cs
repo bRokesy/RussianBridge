@@ -381,11 +381,14 @@ public static class GoogleSheetsLessonLoader
 
         const string assetsResourcesPrefix = "Assets/Resources/";
         const string resourcesPrefix = "Resources/";
+        const string assetsPrefix = "Assets/";
 
         if (path.StartsWith(assetsResourcesPrefix, StringComparison.OrdinalIgnoreCase))
             path = path.Substring(assetsResourcesPrefix.Length);
         else if (path.StartsWith(resourcesPrefix, StringComparison.OrdinalIgnoreCase))
             path = path.Substring(resourcesPrefix.Length);
+        else if (path.StartsWith(assetsPrefix, StringComparison.OrdinalIgnoreCase))
+            path = path.Substring(assetsPrefix.Length);
 
         int slashIndex = path.LastIndexOf('/');
         int dotIndex = path.LastIndexOf('.');
@@ -825,7 +828,7 @@ public static class GoogleSheetsLessonLoader
                     {
                         Debug.LogWarning(
                             $"GoogleSheetsLessonLoader: Sprite project path not found: '{projectAssetPath}'. " +
-                            "In a player build, use an https URL or move the image under Assets/Resources.");
+                            "In a player build, use an https URL or add a matching copy under Assets/Resources.");
                     }
                     else
                     {

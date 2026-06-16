@@ -41,7 +41,7 @@ Common optional columns:
 | `exercise_title` | Any exercise type. |
 | `task_title` | `FillBlank`, `MakeSentence`. |
 | `hint` | `FillBlank`, `MakeSentence`. |
-| `image` | `Translate`, `Flashcards`. Use a URL, a `Resources` path, or an editor-only project asset path. |
+| `image` | `Translate`, `Flashcards`. Use a URL, a `Resources` path, or a mirrored project asset path. |
 | `audio` | `Translate`, `Writing`, `Flashcards`. Use a URL or a `Resources` path. |
 
 Type-specific columns:
@@ -73,5 +73,7 @@ https://example.com/card1.png
 ```
 
 For `Resources` paths, Unity requires the file to be under `Assets/Resources`.
-Project asset paths such as `Assets/Sprites/...` work in Editor Play Mode only;
-use URLs or `Assets/Resources/...` paths for player builds.
+Project asset paths such as `Assets/Sprites/...` can also work in player builds
+when the same path after `Assets/` exists under `Assets/Resources`. For example,
+`Assets/Sprites/Lesson/Lesson1/L1_Ex2.png` is loaded from
+`Assets/Resources/Sprites/Lesson/Lesson1/L1_Ex2.png` on Android.
